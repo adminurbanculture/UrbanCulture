@@ -5,19 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UrbanCulture | CPM1 Car Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Anton for Logo (Bold Streetwear), Inter for UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
+                    fontFamily: {
+                        brand: ['Anton', 'sans-serif'],
+                        ui: ['Inter', 'sans-serif']
+                    },
                     colors: {
-                        apple: {
-                            light: '#f5f5f7',
-                            dark: '#1d1d1f',
-                            blue: '#0071e3'
-                        }
+                        apple: { light: '#f5f5f7', dark: '#1d1d1f', blue: '#0071e3' }
                     }
                 }
             }
@@ -29,16 +31,19 @@
             --apple-spring: cubic-bezier(0.43, 0.05, 0.1, 1.1);
         }
         html { scrollbar-gutter: stable; scroll-behavior: smooth; }
-        body { font-family: 'Inter', sans-serif; transition: background-color: 0.5s var(--apple-ease), color 0.5s var(--apple-ease); background-color: #ffffff; color: #1d1d1f; }
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.5s var(--apple-ease), color 0.5s var(--apple-ease); background-color: #ffffff; color: #1d1d1f; -webkit-tap-highlight-color: transparent; }
         .app-container { width: 100%; min-height: 100vh; position: relative; }
         
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        /* Brand Typography */
+        .brand-text { font-family: 'Anton', sans-serif; letter-spacing: 0.02em; }
+        
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .reveal { animation: fadeInUp 1s var(--apple-ease) forwards; }
         
         header { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transition: all 0.4s var(--apple-ease); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        .bottom-sheet { transform: translateY(100%); transition: transform 0.7s cubic-bezier(0.32, 0.72, 0, 1); }
+        .bottom-sheet { transform: translateY(100%); transition: transform 0.6s cubic-bezier(0.32, 0.72, 0, 1); }
         .bottom-sheet.active { transform: translateY(0); }
         
         .cart-drawer { transform: translateX(100%); transition: transform 0.6s var(--apple-ease); }
@@ -53,39 +58,47 @@
         .modal-container.active { pointer-events: auto; visibility: visible; }
 
         .apple-btn { transition: all 0.3s var(--apple-ease); }
-        .apple-btn:active { transform: scale(0.94); }
+        .apple-btn:active { transform: scale(0.92); }
         
         .product-card { transition: all 0.5s var(--apple-ease); }
-        .product-card:hover { transform: translateY(-8px); }
+        @media (min-width: 1024px) { .product-card:hover { transform: translateY(-10px); } }
 
-        #toast-container { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 12px; align-items: center; pointer-events: none; width: 100%; }
+        /* Perfected Notification Glide */
+        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; width: 100%; padding: 0 20px; }
         .toast { 
-            background: #000; color: #fff; padding: 16px 32px; border-radius: 99px; 
-            transition: opacity 0.4s var(--apple-ease), transform 0.6s var(--apple-spring), margin-top 0.4s var(--apple-ease); 
-            font-size: 14px; font-weight: 600; opacity: 0; transform: translateY(-40px) scale(0.8); 
-            pointer-events: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3); text-align: center;
+            background: #000; color: #fff; padding: 14px 28px; border-radius: 99px; 
+            transition: opacity 0.4s var(--apple-ease), transform 0.5s var(--apple-spring), margin-top 0.4s var(--apple-ease), filter 0.4s; 
+            font-size: 13px; font-weight: 600; opacity: 0; transform: translateY(-30px) scale(0.9); 
+            pointer-events: auto; box-shadow: 0 15px 35px rgba(0,0,0,0.25); text-align: center;
         }
         .toast.show { opacity: 1; transform: translateY(0) scale(1); }
-        .toast.hiding { opacity: 0; transform: translateY(-20px) scale(0.9); margin-top: -60px; pointer-events: none; }
+        .toast.hiding { opacity: 0; transform: translateY(-10px) scale(0.9); margin-top: -60px; filter: blur(4px); }
 
-        .badge { position: absolute; top: 16px; left: 16px; padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; z-index: 10; letter-spacing: 0.05em; }
+        .badge { position: absolute; top: 12px; left: 12px; padding: 5px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; z-index: 10; letter-spacing: 0.02em; }
         .badge-sale { background: #fbbf24; color: #000; }
         .badge-sold { background: #ef4444; color: #fff; }
         .badge-new { background: #fbbf24; color: #000; }
         
+        /* Balanced Dark Mode */
         .dark body { background-color: #000000; color: #f5f5f7; }
-        .dark header { background: rgba(20, 20, 20, 0.7); border-color: rgba(255,255,255,0.1); }
+        .dark header { background: rgba(22, 22, 23, 0.8); border-color: rgba(255,255,255,0.1); }
         .dark .bg-white { background-color: #1c1c1e; color: #ffffff; }
         .dark .bg-gray-50 { background-color: #121212; }
         .dark .bg-white\/80 { background-color: rgba(28, 28, 30, 0.8); }
         .dark .border-gray-100 { border-color: rgba(255,255,255,0.08); }
-        .dark .text-gray-400 { color: #86868b; }
-        .dark input, .dark select { background-color: #2c2c2e; color: white; border: none; ring: 1px ring-rgba(255,255,255,0.1); }
         .dark .toast { background: #ffffff; color: #000000; }
 
         #adminPanel { display: none; }
         #adminPanel.active { display: block; }
         .glass-btn { backdrop-filter: blur(8px); background: rgba(255, 255, 255, 0.9); }
+        
+        /* Mobile Centering & Alignment */
+        @media (max-width: 640px) {
+            .hero-content { text-align: center !important; left: 0 !important; width: 100%; padding: 0 20px; bottom: 40px !important; }
+            .hero-btn { margin: 0 auto; display: block; }
+            .product-card { display: flex; flex-direction: column; align-items: center; text-align: center; }
+            .product-card .flex { justify-content: center; }
+        }
     </style>
 </head>
 <body class="light">
@@ -93,192 +106,118 @@
 <div id="toast-container"></div>
 
 <div class="app-container">
+    <!-- Header -->
     <div class="sticky top-0 z-40">
-        <header class="border-b border-gray-100 px-6 md:px-12 py-4 flex items-center justify-between bg-white/80">
-            <div class="flex items-center space-x-6 md:space-x-12">
-                <!-- Hamburger menu icon fixed: visibility handled by Tailwind 'hidden' removal -->
-                <button id="adminMenuIcon" onclick="toggleAdmin()" class="hidden apple-btn text-gray-400 hover:text-black dark:hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
-                <h1 class="text-2xl font-extrabold tracking-tighter uppercase cursor-pointer" onclick="location.reload()">UrbanCulture</h1>
+        <header class="border-b border-gray-100 px-4 md:px-12 py-4 flex items-center justify-between bg-white/80">
+            <div class="flex items-center space-x-4 md:space-x-12">
+                <button id="adminMenuIcon" onclick="toggleAdmin()" class="hidden apple-btn text-gray-400 hover:text-black dark:hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="location.reload()">
+                    <img src="logo.jpeg" class="w-8 h-8 rounded-lg shadow-sm" alt="Logo">
+                    <h1 class="brand-text text-xl md:text-2xl uppercase tracking-wider">UrbanCulture</h1>
+                </div>
             </div>
             
-            <div class="flex items-center space-x-5">
+            <div class="flex items-center space-x-3 md:space-x-5">
                 <button onclick="toggleDarkMode()" class="p-2 apple-btn text-gray-400 hover:text-black dark:hover:text-white">
                     <svg id="themeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
                 </button>
                 <a href="https://instagram.com/your_profile" target="_blank" class="p-2 apple-btn text-gray-400 hover:text-black dark:hover:text-white hidden sm:block"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5z"></path><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zM17.5 6.5h.01"></path></svg></a>
                 <button id="authBtn" onclick="openAuthModal()" class="p-2 apple-btn text-gray-400 hover:text-black dark:hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg></button>
-                <button onclick="openCart()" class="p-2 relative apple-btn"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg><span id="cartCount" class="absolute top-1 right-1 bg-black dark:bg-white dark:text-black text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span></button>
+                <button onclick="openCart()" class="p-2 relative apple-btn"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg><span id="cartCount" class="absolute top-1 right-1 bg-black dark:bg-white dark:text-black text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span></button>
             </div>
         </header>
 
-        <nav class="flex overflow-x-auto no-scrollbar py-4 px-6 md:px-12 space-x-4 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-100/10">
-            <button onclick="filterCars('all')" class="cat-btn px-7 py-2.5 bg-black dark:bg-white dark:text-black text-white rounded-full text-xs font-bold whitespace-nowrap apple-btn shadow-md">All Cars</button>
-            <button onclick="filterCars('hyper')" class="cat-btn px-7 py-2.5 bg-gray-100 dark:bg-zinc-800 text-black dark:text-white rounded-full text-xs font-bold whitespace-nowrap apple-btn">Hypercars</button>
-            <button onclick="filterCars('jdm')" class="cat-btn px-7 py-2.5 bg-gray-100 dark:bg-zinc-800 text-black dark:text-white rounded-full text-xs font-bold whitespace-nowrap apple-btn">JDM</button>
-            <button onclick="filterCars('offroad')" class="cat-btn px-7 py-2.5 bg-gray-100 dark:bg-zinc-800 text-black dark:text-white rounded-full text-xs font-bold whitespace-nowrap apple-btn">Offroad</button>
+        <nav class="flex overflow-x-auto no-scrollbar py-3 px-4 md:px-12 space-x-3 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-100/10 justify-start sm:justify-center">
+            <button onclick="filterCars('all')" class="cat-btn px-6 py-2 bg-black dark:bg-white dark:text-black text-white rounded-full text-[11px] font-bold whitespace-nowrap apple-btn">All Cars</button>
+            <button onclick="filterCars('hyper')" class="cat-btn px-6 py-2 bg-gray-100 dark:bg-zinc-800 text-black dark:text-white rounded-full text-[11px] font-bold whitespace-nowrap apple-btn">Hypercars</button>
+            <button onclick="filterCars('jdm')" class="cat-btn px-6 py-2 bg-gray-100 dark:bg-zinc-800 text-black dark:text-white rounded-full text-[11px] font-bold whitespace-nowrap apple-btn">JDM</button>
+            <button onclick="filterCars('offroad')" class="cat-btn px-6 py-2 bg-gray-100 dark:bg-zinc-800 text-black dark:text-white rounded-full text-[11px] font-bold whitespace-nowrap apple-btn">Offroad</button>
         </nav>
     </div>
 
     <!-- Hero Section -->
-    <section class="px-6 md:px-12 mb-16 mt-8 reveal">
-        <div class="relative h-[60vh] md:h-[80vh] bg-zinc-950 rounded-[3rem] overflow-hidden shadow-2xl group">
-            <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=90&w=2000" class="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-[4s] var(--apple-ease)" alt="Hero">
-            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-            <div class="absolute bottom-16 left-12 md:left-20">
-                <h2 class="text-5xl md:text-8xl font-black text-white uppercase tracking-tighter mb-6 leading-none">Elite<br>Showroom</h2>
-                <button onclick="document.getElementById('productGrid').scrollIntoView({behavior:'smooth'})" class="px-10 py-4 bg-white text-black text-sm font-bold uppercase rounded-full apple-btn hover:bg-gray-100 shadow-xl">Explore the Future</button>
+    <section class="px-4 md:px-12 mb-12 mt-6 reveal">
+        <div class="relative h-[45vh] md:h-[75vh] bg-zinc-950 rounded-[2rem] md:rounded-[3.5rem] overflow-hidden shadow-2xl group flex items-center justify-center">
+            <img src="main bg.jpeg" class="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-[4s]" alt="Hero">
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent"></div>
+            <div class="hero-content relative z-10 text-center">
+                <h2 class="brand-text text-5xl md:text-9xl text-white uppercase tracking-tighter mb-5 leading-none"><br></h2>
+                <button onclick="document.getElementById('productGrid').scrollIntoView({behavior:'smooth'})" class="hero-btn px-8 py-3.5 bg-white text-black text-xs font-bold uppercase rounded-full apple-btn hover:bg-gray-100 shadow-xl">Explore Cars</button>
             </div>
         </div>
     </section>
 
     <!-- Admin Panel -->
-    <section id="adminPanel" class="px-6 md:px-12 mb-16 bg-gray-50 dark:bg-zinc-900 py-12 rounded-[3rem] mx-6 md:mx-12 border border-gray-100 dark:border-zinc-800">
-        <div class="flex justify-between items-center mb-10">
-            <h3 class="text-3xl font-black uppercase tracking-tighter">Admin Dashboard</h3>
-            <button onclick="toggleAdmin()" class="px-5 py-2 bg-black dark:bg-white dark:text-black text-white text-[10px] font-bold uppercase rounded-full">Exit Dashboard</button>
+    <section id="adminPanel" class="px-6 md:px-12 mb-12 bg-gray-50 dark:bg-zinc-900 py-10 rounded-[2.5rem] mx-4 md:mx-12 border border-gray-100 dark:border-zinc-800">
+        <div class="flex justify-between items-center mb-8">
+            <h3 class="text-2xl font-black uppercase tracking-tighter">Admin Dashboard</h3>
+            <button onclick="toggleAdmin()" class="px-4 py-1.5 bg-black dark:bg-white dark:text-black text-white text-[10px] font-bold uppercase rounded-full">Close</button>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="space-y-2"><label class="text-[10px] font-black uppercase text-gray-400 ml-3">Car Name</label><input id="adminTitle" type="text" class="w-full px-6 py-4 rounded-2xl border-none ring-1 ring-gray-200 dark:ring-zinc-800 focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all"></div>
-            <div class="space-y-2"><label class="text-[10px] font-black uppercase text-gray-400 ml-3">Price (₹)</label><input id="adminPrice" type="number" class="w-full px-6 py-4 rounded-2xl border-none ring-1 ring-gray-200 dark:ring-zinc-800 focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all"></div>
-            
-            <!-- Image Options: URL and File -->
-            <div class="space-y-2"><label class="text-[10px] font-black uppercase text-gray-400 ml-3">Image URL</label><input id="adminImg" type="text" placeholder="https://..." class="w-full px-6 py-4 rounded-2xl border-none ring-1 ring-gray-200 dark:ring-zinc-800 focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all"></div>
-            <div class="space-y-2"><label class="text-[10px] font-black uppercase text-gray-400 ml-3">Or Upload Image</label><input id="adminFile" type="file" accept="image/*" class="w-full px-6 py-4 rounded-2xl border-none ring-1 ring-gray-200 dark:ring-zinc-800 focus:ring-2 focus:ring-black dark:focus:ring-white outline-none bg-white dark:bg-zinc-800"></div>
-
-            <div class="space-y-2"><label class="text-[10px] font-black uppercase text-gray-400 ml-3">Category</label><select id="adminCat" class="w-full px-6 py-4 rounded-2xl border-none ring-1 ring-gray-200 dark:ring-zinc-800 focus:ring-2 focus:ring-black dark:focus:ring-white outline-none appearance-none"><option value="jdm">JDM</option><option value="hyper">Hypercar</option><option value="offroad">Offroad</option></select></div>
-            <div class="space-y-2"><label class="text-[10px] font-black uppercase text-gray-400 ml-3">Tag Status</label><select id="adminTag" class="w-full px-6 py-4 rounded-2xl border-none ring-1 ring-gray-200 dark:ring-zinc-800 focus:ring-2 focus:ring-black dark:focus:ring-white outline-none appearance-none"><option value="">Standard</option><option value="sale">ON SALE</option><option value="sold">SOLD OUT!</option><option value="new">NEW!!</option></select></div>
-            <div class="flex items-end"><button onclick="adminAddCar()" class="w-full bg-black dark:bg-white dark:text-black text-white py-4 rounded-2xl font-bold uppercase tracking-widest apple-btn shadow-lg">Confirm Add</button></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <input id="adminTitle" type="text" placeholder="Car Name" class="w-full px-5 py-4 rounded-2xl bg-white dark:bg-zinc-800 border-none ring-1 ring-gray-200 dark:ring-zinc-700 outline-none">
+            <input id="adminPrice" type="number" placeholder="Price (₹)" class="w-full px-5 py-4 rounded-2xl bg-white dark:bg-zinc-800 border-none ring-1 ring-gray-200 dark:ring-zinc-700 outline-none">
+            <input id="adminImg" type="text" placeholder="Image URL" class="w-full px-5 py-4 rounded-2xl bg-white dark:bg-zinc-800 border-none ring-1 ring-gray-200 dark:ring-zinc-700 outline-none">
+            <input id="adminFile" type="file" accept="image/*" class="w-full px-5 py-4 rounded-2xl bg-white dark:bg-zinc-800 border-none ring-1 ring-gray-200 dark:ring-zinc-700 outline-none">
+            <select id="adminCat" class="w-full px-5 py-4 rounded-2xl bg-white dark:bg-zinc-800 border-none ring-1 ring-gray-200 dark:ring-zinc-700 outline-none appearance-none"><option value="jdm">JDM</option><option value="hyper">Hypercar</option><option value="offroad">Offroad</option></select>
+            <select id="adminTag" class="w-full px-5 py-4 rounded-2xl bg-white dark:bg-zinc-800 border-none ring-1 ring-gray-200 dark:ring-zinc-700 outline-none appearance-none"><option value="">No Tag</option><option value="sale">ON SALE</option><option value="sold">SOLD OUT!</option><option value="new">NEW!!</option></select>
+            <button onclick="adminAddCar()" class="w-full bg-black dark:bg-white dark:text-black text-white py-4 rounded-2xl font-bold uppercase tracking-widest apple-btn">Global Update</button>
         </div>
     </section>
 
-    <!-- Product Grid -->
-    <section class="px-6 md:px-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-8 gap-y-16 pb-40" id="productGrid"></section>
+    <section class="px-4 md:px-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 md:gap-x-8 gap-y-10 pb-32" id="productGrid"></section>
 
     <!-- Footer -->
-    <footer class="bg-gray-50 dark:bg-zinc-950 border-t border-gray-100 dark:border-zinc-900 py-24 px-6 md:px-12">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-24 py-16 border-b border-gray-200/50 text-center md:text-left">
-            <div class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-5">
-                <div class="p-4 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg></div>
-                <div><p class="text-xs font-black uppercase">Free Shipping</p><p class="text-xs text-gray-400">Instant in-game delivery</p></div>
+    <footer class="bg-gray-50 dark:bg-zinc-950 border-t border-gray-100 dark:border-zinc-900 py-20 px-6 md:px-12 text-center">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-16 py-12 border-b border-gray-200/50">
+            <div class="flex flex-col items-center space-y-3 text-center">
+                <div class="p-3 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg></div>
+                <p class="text-[11px] font-black uppercase">Free Shipping</p>
+                <p class="text-[11px] text-gray-400">Instant server delivery.</p>
             </div>
-            <div class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-5">
-                <div class="p-4 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
-                <div><p class="text-xs font-black uppercase">Secure Payments</p><p class="text-xs text-gray-400">Verified UPI Transfers</p></div>
+            <div class="flex flex-col items-center space-y-3 text-center">
+                <div class="p-3 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
+                <p class="text-[11px] font-black uppercase">Secure Payments</p>
+                <p class="text-[11px] text-gray-400">Verified UPI Transfers.</p>
             </div>
-            <div class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-5">
-                <div class="p-4 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
-                <div><p class="text-xs font-black uppercase">24/7 Contact</p><p class="text-xs text-gray-400">Discord & Instagram</p></div>
+            <div class="flex flex-col items-center space-y-3 text-center">
+                <div class="p-3 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                <p class="text-[11px] font-black uppercase">24/7 Support</p>
+                <p class="text-[11px] text-gray-400">Active community agents.</p>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-16 mb-24">
-            <div class="space-y-6"><h4 class="text-base font-black uppercase tracking-widest">UrbanCulture</h4><p class="text-gray-400 text-sm leading-relaxed">The premier destination for elite high-performance car trading in CPM1.</p></div>
-            <div class="space-y-6"><h4 class="text-[11px] font-black uppercase text-gray-400 tracking-widest">Services</h4><ul class="space-y-3 text-sm"><li><button onclick="openTrackModal()" class="hover:underline">Track My Order</button></li><li><button onclick="openInfo('delivery')" class="hover:underline">Delivery Info</button></li><li><button onclick="openInfo('faq')" class="hover:underline">FAQs</button></li></ul></div>
-            <div class="space-y-6"><h4 class="text-[11px] font-black uppercase text-gray-400 tracking-widest">Legal</h4><ul class="space-y-3 text-sm"><li><button onclick="openInfo('privacy')" class="hover:underline">Privacy Policy</button></li><li><button onclick="openInfo('terms')" class="hover:underline">Terms of Service</button></li><li><button onclick="openInfo('refund')" class="hover:underline">Refund Policy</button></li></ul></div>
-            <div class="space-y-6"><h4 class="text-[11px] font-black uppercase text-gray-400 tracking-widest">Accepted</h4><div class="flex gap-3"><div class="px-4 py-2 border border-gray-200 dark:border-zinc-800 rounded-xl text-[10px] font-black uppercase">UPI Only</div></div></div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16 text-center md:text-left">
+            <div class="space-y-5"><h4 class="brand-text text-lg font-black uppercase tracking-widest">UrbanCulture</h4><p class="text-gray-400 text-[13px] leading-relaxed">The premier destination for elite car trading in CPM1.</p></div>
+            <div class="space-y-5"><h4 class="text-[10px] font-black uppercase text-gray-400 tracking-widest">Services</h4><ul class="space-y-2 text-[13px]"><li><button onclick="openTrackModal()" class="hover:underline">Track My Order</button></li><li><button onclick="openInfo('delivery')" class="hover:underline">Delivery Info</button></li><li><button onclick="openInfo('faq')" class="hover:underline">FAQs</button></li></ul></div>
+            <div class="space-y-5"><h4 class="text-[10px] font-black uppercase text-gray-400 tracking-widest">Legal</h4><ul class="space-y-2 text-[13px]"><li><button onclick="openInfo('privacy')" class="hover:underline">Privacy Policy</button></li><li><button onclick="openInfo('terms')" class="hover:underline">Terms of Service</button></li><li><button onclick="openInfo('refund')" class="hover:underline">Refund Policy</button></li></ul></div>
+            <div class="space-y-5"><h4 class="text-[10px] font-black uppercase text-gray-400 tracking-widest">Accepted</h4><div class="flex gap-2 justify-center md:justify-start"><div class="px-3 py-1.5 border border-gray-200 dark:border-zinc-800 rounded-lg text-[10px] font-black uppercase">UPI</div></div></div>
         </div>
-        <div class="text-center pt-12 border-t border-gray-100 dark:border-zinc-900"><p class="text-[10px] text-gray-400 uppercase tracking-[0.3em]">&copy; 2024 UrbanCulture Store. All Rights Reserved.</p></div>
+        <p class="text-[10px] text-gray-400 uppercase tracking-widest">&copy; 2024 UrbanCulture. All Rights Reserved.</p>
     </footer>
 </div>
 
-<div id="globalOverlay" class="overlay fixed inset-0 z-[60] bg-black/60"></div>
+<div id="globalOverlay" class="overlay fixed inset-0 z-[60]"></div>
 
-<!-- Auth Modal -->
-<div id="authModal" class="modal-container fixed inset-0 flex items-center justify-center p-6">
-    <div class="modal-box bg-white rounded-[3rem] p-12 max-w-[450px] w-full shadow-2xl relative">
-        <button onclick="closeAuthModal()" class="absolute top-8 right-8 text-gray-400 hover:text-black dark:hover:text-white apple-btn"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button>
-        <div id="authView">
-            <h3 class="text-4xl font-black uppercase tracking-tighter mb-3">Sign In</h3>
-            <p class="text-sm text-gray-400 mb-10">Access your showroom dashboard</p>
-            <div class="space-y-6 text-center">
-                <!-- Google Button Container -->
-                <div id="g_id_onload"
-                     data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
-                     data-context="signin"
-                     data-ux_mode="popup"
-                     data-callback="handleCredentialResponse"
-                     data-auto_prompt="false">
-                </div>
-                <div class="g_id_signin flex justify-center"
-                     data-type="standard"
-                     data-shape="pill"
-                     data-theme="outline"
-                     data-text="continue_with"
-                     data-size="large"
-                     data-logo_alignment="left"
-                     data-width="100%">
-                </div>
-
-                <div class="flex items-center space-x-4 py-4"><div class="flex-1 h-px bg-gray-100 dark:bg-zinc-800"></div><span class="text-[10px] font-black text-gray-300 uppercase">Or Secure Login</span><div class="flex-1 h-px bg-gray-100 dark:bg-zinc-800"></div></div>
-                <input id="loginId" type="text" placeholder="Email" class="w-full px-6 py-5 rounded-2xl bg-gray-50 dark:bg-zinc-900 border-none outline-none ring-1 ring-transparent focus:ring-2 focus:ring-black dark:focus:ring-white transition-all font-medium">
-                <input id="loginPass" type="password" placeholder="Password" class="w-full px-6 py-5 rounded-2xl bg-gray-50 dark:bg-zinc-900 border-none outline-none ring-1 ring-transparent focus:ring-2 focus:ring-black dark:focus:ring-white transition-all font-medium mt-3">
-                <button onclick="mockAuth('email')" class="w-full bg-black dark:bg-white dark:text-black text-white py-5 rounded-2xl font-bold uppercase tracking-widest shadow-xl apple-btn mt-2">Login</button>
-            </div>
-        </div>
-        <div id="profileView" class="hidden">
-            <h3 class="text-3xl font-black uppercase mb-3" id="userName"></h3>
-            <p class="text-sm text-gray-400 mb-12" id="userMail"></p>
-            <button onclick="logout()" class="w-full py-5 border-2 border-red-500 text-red-500 rounded-2xl font-bold uppercase apple-btn">Sign Out</button>
-        </div>
-    </div>
-</div>
-
-<!-- Tracking, QR, Product & Info Modals same as before... -->
-<div id="trackModal" class="modal-container fixed inset-0 flex items-center justify-center p-6">
-    <div class="modal-box bg-white rounded-[3rem] p-12 max-w-[500px] w-full shadow-2xl relative text-center">
-        <button onclick="closeTrackModal()" class="absolute top-8 right-8 text-gray-400 hover:text-black dark:hover:text-white apple-btn"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button>
-        <h3 class="text-3xl font-black uppercase tracking-tighter mb-4">Track Order</h3>
-        <div class="space-y-4"><input id="trackIdInput" type="text" placeholder="UC-XXXX-XXXX" class="w-full px-6 py-5 rounded-2xl bg-gray-50 dark:bg-zinc-900 border-none outline-none focus:ring-2 focus:ring-black text-center font-bold tracking-widest uppercase"><button onclick="performTrack()" class="w-full bg-black dark:bg-white dark:text-black text-white py-5 rounded-2xl font-bold uppercase tracking-widest shadow-xl">Track Status</button></div>
-        <div id="trackResult" class="mt-8 hidden p-8 bg-gray-50 dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800"><p id="trackStatus" class="text-black dark:text-white font-black uppercase"></p><p id="trackDetail" class="text-xs text-gray-400 mt-2"></p></div>
-    </div>
-</div>
-
-<div id="qrModal" class="modal-container fixed inset-0 flex items-center justify-center p-6">
-    <div class="modal-box bg-white rounded-[3rem] p-12 max-w-[400px] w-full text-center shadow-2xl relative">
-        <button onclick="closeQr()" class="absolute top-8 right-8 text-gray-400 hover:text-black dark:hover:text-white apple-btn"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button>
-        <h3 class="text-2xl font-black uppercase tracking-tighter mb-4">Confirm Payment</h3>
-        <div class="bg-gray-100 dark:bg-zinc-900 p-8 rounded-[2rem] mb-8 relative min-h-[280px] flex items-center justify-center">
-            <div id="qrLoader">Generating Secure QR...</div>
-            <img id="qrImage" src="" alt="QR" class="w-full h-auto border-8 border-white dark:border-zinc-800 rounded-2xl shadow-sm hidden" onload="onQrLoaded()">
-        </div>
-        <div class="flex justify-between items-center mb-4 px-2"><span class="text-gray-400 font-bold uppercase text-[10px]">Investment</span><span id="qrAmount" class="text-2xl font-black tracking-tighter">₹0</span></div>
-    </div>
-</div>
-
-<div id="productModal" class="bottom-sheet fixed bottom-0 left-0 right-0 lg:left-auto lg:right-0 lg:top-0 lg:bottom-0 lg:w-[550px] lg:h-full lg:rounded-none bg-white rounded-t-[3rem] z-[70] overflow-hidden shadow-2xl">
-    <div class="p-8 lg:p-12 h-full overflow-y-auto relative">
-        <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-400 hover:text-black dark:hover:text-white apple-btn"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button>
-        <div class="aspect-video bg-gray-100 dark:bg-zinc-900 rounded-[2rem] overflow-hidden mb-10 shadow-inner"><img id="modalImg" src="" class="w-full h-full object-cover"></div>
-        <div class="flex justify-between items-start mb-6"><div><h3 id="modalTitle" class="text-4xl font-black uppercase tracking-tighter leading-none"></h3><p class="text-gray-400 text-xs font-bold uppercase mt-2">CPM1 Showroom Grade</p></div><p id="modalPrice" class="text-4xl font-black tracking-tighter italic">₹0</p></div>
-        <button id="modalAddToCart" class="w-full py-6 bg-black dark:bg-white dark:text-black text-white font-bold uppercase tracking-widest rounded-2xl shadow-2xl active:scale-[0.98] transition-all">Add to Garage</button>
-    </div>
-</div>
-
-<div id="cartDrawer" class="cart-drawer fixed top-0 right-0 bottom-0 w-full max-w-[450px] bg-white z-[70] flex flex-col shadow-2xl border-l border-gray-100/10">
-    <div class="p-10 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between"><h2 class="text-3xl font-black uppercase tracking-tighter">My Garage</h2><button onclick="closeCart()" class="p-2 apple-btn"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button></div>
-    <div id="cartItems" class="flex-1 overflow-y-auto p-10 space-y-10"></div>
-    <div class="p-10 border-t border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50"><div class="flex justify-between items-center mb-10"><span class="text-gray-400 font-bold uppercase text-[11px] tracking-widest">Grand Total</span><span id="cartSubtotal" class="text-4xl font-black tracking-tighter italic">₹0.00</span></div><button id="checkoutBtn" class="w-full py-6 bg-black dark:bg-white dark:text-black text-white font-bold uppercase rounded-3xl shadow-2xl apple-btn">Finalize Purchase</button></div>
-</div>
-
-<div id="infoModal" class="modal-container fixed inset-0 flex items-center justify-center p-6">
-    <div class="modal-box bg-white rounded-[3rem] p-12 max-w-[650px] w-full max-h-[85vh] overflow-y-auto shadow-2xl relative"><button onclick="closeInfo()" class="absolute top-8 right-8 text-gray-400 hover:text-black dark:hover:text-white apple-btn"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button><h3 id="infoTitle" class="text-3xl font-black uppercase tracking-tighter mb-8"></h3><div id="infoContent" class="text-gray-500 text-sm leading-relaxed space-y-6"></div></div>
-</div>
+<!-- Modals same structure... -->
+<div id="infoModal" class="modal-container fixed inset-0 flex items-center justify-center p-6"><div class="modal-box bg-white rounded-[3rem] p-10 max-w-[600px] w-full max-h-[80vh] overflow-y-auto shadow-2xl relative"><button onclick="closeInfo()" class="absolute top-7 right-7 text-gray-400 hover:text-black dark:hover:text-white apple-btn"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button><h3 id="infoTitle" class="text-3xl font-black uppercase tracking-tighter mb-6"></h3><div id="infoContent" class="text-gray-500 text-sm leading-relaxed space-y-4"></div></div></div>
+<div id="trackModal" class="modal-container fixed inset-0 flex items-center justify-center p-6"><div class="modal-box bg-white rounded-[2.5rem] p-10 max-w-[450px] w-full shadow-2xl relative text-center"><button onclick="closeTrackModal()" class="absolute top-7 right-7 text-gray-400 hover:text-black dark:hover:text-white apple-btn"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button><h3 class="text-3xl font-black uppercase tracking-tighter mb-3">Track Order</h3><div class="space-y-4 mt-6"><input id="trackIdInput" type="text" placeholder="ORDER ID (UC-XXXX)" class="w-full px-6 py-4 rounded-2xl bg-gray-50 dark:bg-zinc-900 border-none outline-none focus:ring-2 focus:ring-black text-center font-bold tracking-widest uppercase text-sm"><button onclick="performTrack()" class="w-full bg-black dark:bg-white dark:text-black text-white py-4 rounded-2xl font-bold uppercase tracking-widest shadow-xl">Track Status</button></div><div id="trackResult" class="mt-8 hidden p-6 bg-gray-50 dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800"><p id="trackStatus" class="text-black dark:text-white font-black uppercase text-sm"></p><p id="trackDetail" class="text-[11px] text-gray-400 mt-2"></p></div></div></div>
+<div id="qrModal" class="modal-container fixed inset-0 flex items-center justify-center p-6"><div class="modal-box bg-white rounded-[2.5rem] p-10 max-w-[380px] w-full text-center shadow-2xl relative"><button onclick="closeQr()" class="absolute top-7 right-7 text-gray-400 hover:text-black dark:hover:text-white apple-btn"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button><h3 class="text-2xl font-black uppercase tracking-tighter mb-4 whitespace-nowrap">Secure Transfer</h3><div class="bg-gray-100 dark:bg-zinc-900 p-6 rounded-3xl mb-6 relative min-h-[260px] flex items-center justify-center"><div id="qrLoader">Generating QR...</div><img id="qrImage" src="" alt="QR" class="w-full h-auto border-8 border-white dark:border-zinc-800 rounded-2xl shadow-sm hidden" onload="onQrLoaded()"></div><div class="flex justify-between items-center"><span class="text-gray-400 font-bold text-[9px] uppercase">Total</span><span id="qrAmount" class="text-xl font-black">₹0</span></div></div></div>
+<div id="authModal" class="modal-container fixed inset-0 flex items-center justify-center p-6"><div class="modal-box bg-white rounded-[3rem] p-10 max-w-[420px] w-full shadow-2xl relative text-center"><button onclick="closeAuthModal()" class="absolute top-7 right-7 text-gray-400 hover:text-black dark:hover:text-white apple-btn"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button><div id="authView"><h3 class="text-3xl font-black uppercase tracking-tighter mb-2">Account</h3><div class="space-y-5 mt-8"><div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse" data-auto_prompt="false"></div><div class="g_id_signin flex justify-center" data-type="standard" data-shape="pill" data-theme="outline" data-text="continue_with" data-size="large" data-width="100%"></div><input id="loginId" type="text" placeholder="Email" class="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-zinc-900 border-none outline-none ring-1 ring-transparent focus:ring-2 focus:ring-black dark:focus:ring-white transition-all"><input id="loginPass" type="password" placeholder="Password" class="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-zinc-900 border-none outline-none ring-1 ring-transparent focus:ring-2 focus:ring-black dark:focus:ring-white transition-all mt-2"><button onclick="mockAuth()" class="w-full bg-black dark:bg-white dark:text-black text-white py-4 rounded-2xl font-bold uppercase tracking-widest apple-btn">Login</button></div></div><div id="profileView" class="hidden"><h3 class="text-2xl font-black uppercase mb-2" id="userName"></h3><button onclick="logout()" class="w-full py-4 border-2 border-red-500 text-red-500 rounded-2xl font-bold uppercase mt-8">Sign Out</button></div></div></div>
+<div id="productModal" class="bottom-sheet fixed bottom-0 left-0 right-0 lg:left-auto lg:right-0 lg:top-0 lg:bottom-0 lg:w-[500px] lg:h-full lg:rounded-none bg-white rounded-t-[2.5rem] z-[70] overflow-hidden shadow-2xl"><div class="p-8 h-full overflow-y-auto relative flex flex-col items-center sm:items-start text-center sm:text-left"><button onclick="closeModal()" class="absolute top-7 right-7 text-gray-400 hover:text-black dark:hover:text-white apple-btn"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button><div class="aspect-video w-full bg-gray-100 dark:bg-zinc-900 rounded-3xl overflow-hidden mb-8 shadow-inner"><img id="modalImg" src="" class="w-full h-full object-cover"></div><h3 id="modalTitle" class="text-3xl font-black uppercase tracking-tighter mb-2"></h3><p id="modalPrice" class="text-3xl font-black mb-8">₹0</p><button id="modalAddToCart" class="w-full py-5 bg-black dark:bg-white dark:text-black text-white font-bold uppercase rounded-2xl shadow-xl active:scale-[0.98] transition-all">Add to Garage</button></div></div>
+<div id="cartDrawer" class="cart-drawer fixed top-0 right-0 bottom-0 w-full max-w-[420px] bg-white z-[70] flex flex-col shadow-2xl"><div class="p-10 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between font-black uppercase tracking-tighter text-3xl">Garage <button onclick="closeCart()" class="p-2 apple-btn"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div id="cartItems" class="flex-1 overflow-y-auto p-10 space-y-10"></div><div class="p-10 border-t border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50"><div class="flex justify-between items-center mb-10 font-black tracking-tighter text-4xl">₹ <span id="cartSubtotal">0.00</span></div><button id="checkoutBtn" class="w-full py-6 bg-black dark:bg-white dark:text-black text-white font-bold uppercase rounded-3xl shadow-2xl apple-btn">Finalize Purchase</button></div></div>
 
 <script>
-    // Security: Credentials obfuscated via Base64
-    const _AX = "YWRtaW5AdXJiYW5jdWx0dXJlLmNvbQ=="; // admin@urbanculture.com
-    const _PX = "YWRtaW4xMjM="; // admin123
-    
-    const productsData = [
-        { id: 1, title: "Ghost Skyline R34", price: 1499, oldPrice: 2499, img: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=90&w=600&h=400", cat: "jdm", tag: "new" },
-        { id: 2, title: "Drift Beast S15", price: 1299, oldPrice: 1999, img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=90&w=600&h=400", cat: "jdm", tag: "sale" },
-        { id: 4, title: "Phantom Chiron", price: 4999, oldPrice: 7999, img: "https://images.unsplash.com/photo-1542281286-9e0a16bb7366?auto=format&fit=crop&q=90&w=600&h=400", cat: "hyper", tag: "sold" },
-        { id: 6, title: "Desert Monster 4x4", price: 1599, oldPrice: 2199, img: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=90&w=600&h=400", cat: "offroad", tag: "new" }
-    ];
+    // Supabase Credentials
+    const _SUB_URL = 'https://kpmhmxctsldrjlavcxrf.supabase.co';
+    const _SUB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwbWhteGN0c2xkcmpsYXZjeHJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODU4ODksImV4cCI6MjA5NjE2MTg4OX0.xf_cR7_0RyGJT5_z1-oTKhSyTawJ0O8X1gunrMqRQlI';
+    const _db = supabase.createClient(_SUB_URL, _SUB_KEY);
 
-    let products = JSON.parse(localStorage.getItem('uc_products')) || productsData;
-    let orders = JSON.parse(localStorage.getItem('uc_orders')) || {};
-    let currentUser = JSON.parse(localStorage.getItem('uc_user')) || null;
+    const _AX = "YWRtaW5AdXJiYW5jdWx0dXJlLmNvbQ=="; 
+    const _PX = "YWRtaW4xMjM="; 
+
+    let products = []; let orders = {}; let currentUser = JSON.parse(localStorage.getItem('uc_user')) || null;
     let cart = []; let currentFilter = 'all'; let selectedProduct = null;
     
     const els = {
@@ -287,174 +226,61 @@
         track: document.getElementById('trackModal'), auth: document.getElementById('authModal')
     };
 
-    function showToast(msg) {
-        const t = document.createElement('div'); t.className = 'toast'; t.innerText = msg;
-        els.toastContainer.appendChild(t); 
-        requestAnimationFrame(() => t.classList.add('show'));
-        setTimeout(() => { 
-            t.classList.add('hiding'); 
-            setTimeout(() => t.remove(), 600); 
-        }, 2500);
-    }
-
-    function toggleDarkMode() {
-        document.documentElement.classList.toggle('dark');
-        const isDark = document.documentElement.classList.contains('dark');
-        localStorage.setItem('uc_theme', isDark ? 'dark' : 'light');
-        document.getElementById('themeIcon').innerHTML = isDark ? 
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 18v1m9-9h1M3 12h1m15.364 6.364l-.707-.707M6.343 6.364l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>' : 
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>';
-    }
-
-    function handleCredentialResponse(response) {
-        try {
-            const payload = JSON.parse(atob(response.credential.split('.')[1]));
-            currentUser = { email: payload.email, name: payload.name, isAdmin: false };
-            localStorage.setItem('uc_user', JSON.stringify(currentUser));
-            updateAuthUI(); closeAuthModal(); showToast("Real Auth: " + currentUser.name);
-        } catch(e) { showToast("Sign in failed"); }
-    }
-
-    function updateAuthUI() {
-        const adminIcon = document.getElementById('adminMenuIcon');
-        if(currentUser) {
-            document.getElementById('authBtn').classList.add('text-black', 'dark:text-white');
-            document.getElementById('authView').classList.add('hidden');
-            document.getElementById('profileView').classList.remove('hidden');
-            document.getElementById('userName').innerText = currentUser.name;
-            document.getElementById('userMail').innerText = currentUser.email;
-            if(currentUser.isAdmin) adminIcon.classList.remove('hidden');
-            else adminIcon.classList.add('hidden');
-        } else {
-            document.getElementById('authBtn').classList.remove('text-black', 'dark:text-white');
-            document.getElementById('authView').classList.remove('hidden');
-            document.getElementById('profileView').classList.add('hidden');
-            adminIcon.classList.add('hidden');
-            document.getElementById('adminPanel').classList.remove('active');
-        }
-        renderGrid();
-    }
-
+    function showToast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.innerText = msg; els.toastContainer.appendChild(t); requestAnimationFrame(() => t.classList.add('show')); setTimeout(() => { t.classList.add('hiding'); setTimeout(() => t.remove(), 600); }, 2500); }
+    async function syncProducts() { const { data, error } = await _db.from('products').select('*').order('id', { ascending: false }); if(!error) { products = data; if(products.length === 0) { els.grid.innerHTML = '<div class="col-span-full py-20 text-center text-gray-400 font-bold uppercase tracking-widest">Showroom Empty. Add cars from Admin.</div>'; } else { renderGrid(); } } }
+    function toggleDarkMode() { document.documentElement.classList.toggle('dark'); localStorage.setItem('uc_theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); }
+    function handleCredentialResponse(r) { const p = JSON.parse(atob(r.credential.split('.')[1])); currentUser = { email: p.email, name: p.name, isAdmin: false }; localStorage.setItem('uc_user', JSON.stringify(currentUser)); updateAuthUI(); closeAuthModal(); showToast("Logged in: " + currentUser.name); }
+    function updateAuthUI() { const i = document.getElementById('adminMenuIcon'); if(currentUser) { document.getElementById('authView').classList.add('hidden'); document.getElementById('profileView').classList.remove('hidden'); document.getElementById('userName').innerText = currentUser.name; if(currentUser.isAdmin) i.classList.remove('hidden'); else i.classList.add('hidden'); } else { document.getElementById('authView').classList.remove('hidden'); document.getElementById('profileView').classList.add('hidden'); i.classList.add('hidden'); document.getElementById('adminPanel').classList.remove('active'); } renderGrid(); }
     function openAuthModal() { els.auth.classList.add('active'); els.overlay.classList.add('active'); }
     function closeAuthModal() { els.auth.classList.remove('active'); checkOverlay(); }
-    
-    function googleSignIn() {
-        showToast("Connecting to Google...");
-        setTimeout(() => {
-            currentUser = { email: "user_google@gmail.com", name: "Google User", isAdmin: false };
-            localStorage.setItem('uc_user', JSON.stringify(currentUser));
-            updateAuthUI(); closeAuthModal(); showToast("Signed in with Google");
-        }, 1200);
-    }
-
-    function mockAuth(type) {
-        const email = document.getElementById('loginId').value.trim();
-        const pass = document.getElementById('loginPass').value.trim();
-        if(!email) return alert("Enter Credentials");
-        const isAdmin = (btoa(email) === _AX && btoa(pass) === _PX);
-        currentUser = { email: email, name: email.split('@')[0], isAdmin: isAdmin };
-        localStorage.setItem('uc_user', JSON.stringify(currentUser));
-        updateAuthUI(); closeAuthModal(); showToast("Welcome " + currentUser.name);
-    }
-
+    function mockAuth() { const e = document.getElementById('loginId').value; const p = document.getElementById('loginPass').value; if(!e) return alert("Enter Email"); const isAdmin = (btoa(e) === _AX && btoa(p) === _PX); currentUser = { email: e, name: e.split('@')[0], isAdmin: isAdmin }; localStorage.setItem('uc_user', JSON.stringify(currentUser)); updateAuthUI(); closeAuthModal(); showToast("Welcome " + currentUser.name); }
     function logout() { currentUser = null; localStorage.removeItem('uc_user'); updateAuthUI(); showToast("Logged Out"); }
-    function toggleAdmin() { if(currentUser?.isAdmin) document.getElementById('adminPanel').classList.toggle('active'); renderGrid(); }
-    
-    function adminAddCar() {
-        const title = document.getElementById('adminTitle').value;
-        const price = document.getElementById('adminPrice').value;
-        const imgUrl = document.getElementById('adminImg').value;
-        const imgFile = document.getElementById('adminFile').files[0];
-        const cat = document.getElementById('adminCat').value;
-        const tag = document.getElementById('adminTag').value;
+    function toggleAdmin() { document.getElementById('adminPanel').classList.toggle('active'); renderGrid(); }
 
-        if(!title || !price || (!imgUrl && !imgFile)) return alert("Fill Name, Price and provide an Image");
-
-        const finalizeAdd = (finalImg) => {
-            products.push({ id: Date.now(), title, price: parseInt(price), oldPrice: price * 1.5, img: finalImg, cat, tag });
-            localStorage.setItem('uc_products', JSON.stringify(products));
-            renderGrid(); showToast("Added to Store");
-            // Clear fields
-            document.getElementById('adminTitle').value = ''; document.getElementById('adminPrice').value = '';
-            document.getElementById('adminImg').value = ''; document.getElementById('adminFile').value = '';
-        };
-
-        if(imgFile) {
-            const reader = new FileReader();
-            reader.onload = (e) => finalizeAdd(e.target.result);
-            reader.readAsDataURL(imgFile);
-        } else {
-            finalizeAdd(imgUrl);
-        }
+    async function adminAddCar() {
+        const t = document.getElementById('adminTitle').value; const p = document.getElementById('adminPrice').value; const i = document.getElementById('adminImg').value; const f = document.getElementById('adminFile').files[0];
+        if(!t || !p || (!i && !f)) return alert("Fill data");
+        let finalImg = i;
+        if(f) { const { data, error } = await _db.storage.from('cars').upload(`public/${Date.now()}_${f.name}`, f); if(!error) { const { data: { publicUrl } } = _db.storage.from('cars').getPublicUrl(data.path); finalImg = publicUrl; } }
+        const { error } = await _db.from('products').insert([{ title: t, price: parseInt(p), old_price: p*1.5, img: finalImg, cat: document.getElementById('adminCat').value, tag: document.getElementById('adminTag').value }]);
+        if(!error) { showToast("Global showroom updated!"); syncProducts(); }
     }
 
-    function deleteCar(id) { products = products.filter(p => p.id !== id); localStorage.setItem('uc_products', JSON.stringify(products)); renderGrid(); }
-
-    function filterCars(cat) {
-        currentFilter = cat;
-        document.querySelectorAll('.cat-btn').forEach(btn => {
-            const match = (cat === 'all' && btn.innerText.includes('All')) || btn.innerText.toLowerCase().includes(cat);
-            btn.classList.toggle('bg-black', match); btn.classList.toggle('dark:bg-white', match); btn.classList.toggle('dark:text-black', match); btn.classList.toggle('text-white', match);
-            btn.classList.toggle('bg-gray-100', !match); btn.classList.toggle('dark:bg-zinc-800', !match); btn.classList.toggle('text-black', !match); btn.classList.toggle('dark:text-white', !match);
-        });
-        renderGrid();
-        setTimeout(() => els.grid.scrollIntoView({behavior:'smooth', block:'start'}), 100);
-    }
-
-    function renderGrid() {
-        els.grid.innerHTML = '';
-        const filtered = currentFilter === 'all' ? products : products.filter(p => p.cat === currentFilter);
-        filtered.forEach(p => {
-            const isAdmin = currentUser?.isAdmin && document.getElementById('adminPanel').classList.contains('active');
-            let badge = p.tag ? `<div class="badge badge-${p.tag}">${p.tag === 'sale' ? 'ON SALE' : (p.tag === 'sold' ? 'SOLD OUT!' : 'NEW!!')}</div>` : '';
-            const card = document.createElement('div'); card.className = 'product-card group cursor-pointer reveal relative';
-            card.innerHTML = `<div class="aspect-[1.5/1] bg-gray-100 dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden mb-6 relative shadow-sm transition-all">${badge}${isAdmin ? `<button onclick="event.stopPropagation(); deleteCar(${p.id})" class="absolute top-4 right-4 bg-red-500 text-white w-9 h-9 rounded-full z-20 flex items-center justify-center shadow-lg">×</button>` : ''}<img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-[1s] ease-out"><div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity"></div><button onclick="event.stopPropagation(); quickAdd(${p.id})" class="absolute bottom-6 right-6 w-14 h-14 glass-btn text-black rounded-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all shadow-xl"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg></button></div><div class="px-3"><h3 class="text-sm font-extrabold uppercase mb-2 tracking-tight leading-none">${p.title}</h3><div class="flex items-center space-x-4"><span class="text-xl font-black tracking-tighter">₹${p.price}</span><span class="text-xs text-gray-400 line-through">₹${p.oldPrice}</span></div></div>`;
-            card.onclick = () => openModal(p); els.grid.appendChild(card);
-        });
-    }
-
+    async function deleteCar(id) { await _db.from('products').delete().eq('id', id); showToast("Car Deleted"); syncProducts(); }
+    function filterCars(cat) { currentFilter = cat; document.querySelectorAll('.cat-btn').forEach(btn => { const match = (cat === 'all' && btn.innerText.includes('All')); btn.classList.toggle('bg-black', match || btn.innerText.toLowerCase().includes(cat)); btn.classList.toggle('text-white', match || btn.innerText.toLowerCase().includes(cat)); btn.classList.toggle('bg-gray-100', !match && !btn.innerText.toLowerCase().includes(cat)); btn.classList.toggle('text-black', !match && !btn.innerText.toLowerCase().includes(cat)); }); renderGrid(); setTimeout(() => els.grid.scrollIntoView({behavior:'smooth', block:'start'}), 100); }
+    function renderGrid() { els.grid.innerHTML = ''; const filtered = currentFilter === 'all' ? products : products.filter(p => p.cat === currentFilter); filtered.forEach(p => { const isAdmin = currentUser?.isAdmin && document.getElementById('adminPanel').classList.contains('active'); let badge = p.tag ? `<div class="badge badge-${p.tag}">${p.tag === 'sale' ? 'ON SALE' : (p.tag === 'sold' ? 'SOLD OUT!' : 'NEW!!')}</div>` : ''; const card = document.createElement('div'); card.className = 'product-card group cursor-pointer reveal flex flex-col items-center text-center'; card.innerHTML = `<div class="aspect-[1.5/1] w-full bg-gray-100 dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden mb-5 relative shadow-sm transition-all">${badge}${isAdmin ? `<button onclick="event.stopPropagation(); deleteCar(${p.id})" class="absolute top-4 right-4 bg-red-500 text-white w-9 h-9 rounded-full z-20 flex items-center justify-center shadow-lg font-bold">×</button>` : ''}<img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-[1s] ease-out"><div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div><button onclick="event.stopPropagation(); quickAdd(${p.id})" class="absolute bottom-6 right-6 w-14 h-14 glass-btn text-black rounded-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all shadow-xl"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg></button></div><div class="px-2 w-full"><h3 class="text-[15px] font-black uppercase mb-1 tracking-tight leading-none">${p.title}</h3><div class="flex items-center space-x-3 justify-center"><span class="text-xl font-black italic tracking-tighter">₹${p.price}</span><span class="text-xs text-gray-400 line-through">₹${Math.round(p.old_price)}</span></div></div>`; card.onclick = () => openModal(p); els.grid.appendChild(card); }); }
     function openModal(p) { selectedProduct = p; document.getElementById('modalImg').src = p.img; document.getElementById('modalTitle').innerText = p.title; document.getElementById('modalPrice').innerText = `₹${p.price}`; els.modal.classList.add('active'); els.overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
     function closeModal() { els.modal.classList.remove('active'); checkOverlay(); document.body.style.overflow = 'auto'; }
     function openCart() { els.cart.classList.add('active'); els.overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
     function closeCart() { els.cart.classList.remove('active'); checkOverlay(); document.body.style.overflow = 'auto'; }
     function checkOverlay() { if(!els.cart.classList.contains('active') && !els.auth.classList.contains('active') && !els.track.classList.contains('active') && !els.qr.classList.contains('active') && !els.info.classList.contains('active')) els.overlay.classList.remove('active'); }
     function quickAdd(id) { addToCart(products.find(p => p.id === id)); }
-    function addToCart(p) { if(p.tag === 'sold') return showToast("SOLD OUT!"); cart.push({ ...p, uid: Date.now() + Math.random() }); updateUI(); showToast("Added to Garage"); closeModal(); }
-    function updateUI() { els.items.innerHTML = ''; let t = 0; cart.forEach(item => { t += item.price; const el = document.createElement('div'); el.className = 'flex items-center justify-between space-x-6'; el.innerHTML = `<div class="flex items-center space-x-6"><div class="w-24 h-24 bg-gray-50 dark:bg-zinc-800 rounded-3xl overflow-hidden flex-shrink-0 shadow-inner"><img src="${item.img}" class="w-full h-full object-cover"></div><div class="flex-1"><h4 class="text-xs font-black uppercase mb-1 leading-none">${item.title}</h4><p class="text-lg font-black tracking-tighter">₹${item.price}</p></div></div><button onclick="removeFromCart(${item.uid})" class="text-gray-200 hover:text-red-500 transition-colors"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>`; els.items.appendChild(el); }); els.count.innerText = cart.length; els.total.innerText = `₹${t.toFixed(2)}`; }
+    function addToCart(p) { if(p.tag === 'sold') return showToast("SOLD OUT!"); cart.push({ ...p, uid: Date.now() + Math.random() }); updateUI(); showToast("Added: " + p.title); closeModal(); }
+    function updateUI() { els.items.innerHTML = ''; let t = 0; cart.forEach(item => { t += item.price; const el = document.createElement('div'); el.className = 'flex items-center justify-between space-x-6'; el.innerHTML = `<div class="flex items-center space-x-6"><div class="w-24 h-24 bg-gray-50 dark:bg-zinc-800 rounded-3xl overflow-hidden flex-shrink-0 shadow-inner"><img src="${item.img}" class="w-full h-full object-cover"></div><div class="flex-1"><h4 class="text-xs font-black uppercase mb-1 leading-none">${item.title}</h4><p class="text-lg font-black tracking-tighter">₹${item.price}</p></div></div><button onclick="removeFromCart(${item.uid})" class="text-gray-200 hover:text-red-500 transition-colors"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>`; els.items.appendChild(el); }); els.count.innerText = cart.length; els.total.innerText = t.toFixed(2); }
     function removeFromCart(uid) { cart = cart.filter(x => x.uid !== uid); updateUI(); }
     function openTrackModal() { els.track.classList.add('active'); els.overlay.classList.add('active'); document.getElementById('trackResult').classList.add('hidden'); }
     function closeTrackModal() { els.track.classList.remove('active'); checkOverlay(); }
-    function performTrack() {
-        const id = document.getElementById('trackIdInput').value.trim().toUpperCase();
-        const res = orders[id]; document.getElementById('trackResult').classList.remove('hidden');
-        if(res) { document.getElementById('trackStatus').innerText = "Status: " + res.status; document.getElementById('trackDetail').innerText = "Items: " + res.items + " | Total: " + res.total; }
-        else { document.getElementById('trackStatus').innerText = "ID Not Found"; document.getElementById('trackDetail').innerText = "Check your ID."; }
-    }
-    function openInfo(k) { const infoData = { delivery: { t: "Delivery Info", c: "Instant in-game server transfers." }, faq: { t: "FAQs", c: "Permanent cars. Secure methods." }, privacy: { t: "Privacy", c: "Encrypted details." }, terms: { t: "Terms", c: "All sales final." }, refund: { t: "Refund", c: "Only if transfer fails." } }; const d = infoData[k]; document.getElementById('infoTitle').innerText = d.t; document.getElementById('infoContent').innerHTML = `<p>${d.c}</p>`; els.info.classList.add('active'); els.overlay.classList.add('active'); }
+    async function performTrack() { const id = document.getElementById('trackIdInput').value.trim().toUpperCase(); const { data, error } = await _db.from('orders').select('*').eq('id', id).single(); document.getElementById('trackResult').classList.remove('hidden'); if(data) { document.getElementById('trackStatus').innerText = "Status: " + data.status; document.getElementById('trackDetail').innerText = "Investment: ₹" + data.total; } else { document.getElementById('trackStatus').innerText = "ID Not Found"; } }
+    function openInfo(k) { const infoData = { delivery: { t: "Delivery Info", c: "Instant server transfers. Once payment is verified, our agent will contact you on Discord to deliver the vehicle." }, faq: { t: "FAQs", c: "<b>Q: Are cars permanent?</b> Yes. <b>Q: Is it safe?</b> We use verified CPM1 transfer methods." }, privacy: { t: "Privacy", c: "Your data is encrypted. We do not store personal banking information." }, terms: { t: "Terms", c: "All sales final once the vehicle is transferred in-game. By buying, you agree to our 18+ policy." }, refund: { t: "Refund", c: "Refunds are only processed if a technical failure prevents delivery within 24 hours." } }; const d = infoData[k]; document.getElementById('infoTitle').innerText = d.t; document.getElementById('infoContent').innerHTML = `<p>${d.c}</p>`; els.info.classList.add('active'); els.overlay.classList.add('active'); }
     function closeInfo() { els.info.classList.remove('active'); checkOverlay(); }
     function closeQr() { els.qr.classList.remove('active'); checkOverlay(); }
     function onQrLoaded() { document.getElementById('qrLoader').classList.add('hidden'); document.getElementById('qrImage').classList.remove('hidden'); }
 
-    document.getElementById('checkoutBtn').onclick = () => {
+    document.getElementById('checkoutBtn').onclick = async () => {
         if (cart.length === 0) return alert('Garage empty!');
         const total = cart.reduce((s, i) => s + i.price, 0);
         const orderId = 'UC-' + Math.random().toString(36).substr(2, 4).toUpperCase() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
-        orders[orderId] = { id: orderId, status: "Awaiting Verification", items: cart.map(i=>i.title).join(", "), total: "₹" + total };
-        localStorage.setItem('uc_orders', JSON.stringify(orders));
+        await _db.from('orders').insert([{ id: orderId, status: "Awaiting Verification", items: cart.map(i=>i.title).join(", "), total: total.toString() }]);
         const upi = `upi://pay?pa=YOUR_UPI_ID_HERE@bank&pn=UrbanCulture&am=${total}&cu=INR`;
-        document.getElementById('checkoutOrderId').innerText = orderId;
         document.getElementById('qrAmount').innerText = `₹${total.toFixed(2)}`;
-        document.getElementById('qrLoader').classList.remove('hidden'); document.getElementById('qrImage').classList.add('hidden');
         document.getElementById('qrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(upi)}`;
-        if (/Android|iPhone|iPad/i.test(navigator.userAgent)) { showToast("Opening UPI..."); setTimeout(() => window.location.href = upi, 1000); }
-        else { els.qr.classList.add('active'); els.overlay.classList.add('active'); }
+        els.qr.classList.add('active'); els.overlay.classList.add('active');
     };
     
     els.overlay.onclick = () => { closeCart(); closeModal(); closeInfo(); closeQr(); closeTrackModal(); closeAuthModal(); };
     document.getElementById('modalAddToCart').onclick = () => addToCart(selectedProduct);
-    
     if(localStorage.getItem('uc_theme') === 'dark') toggleDarkMode();
-    updateAuthUI();
+    updateAuthUI(); syncProducts();
 </script>
 </body>
 </html>
