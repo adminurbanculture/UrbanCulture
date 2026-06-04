@@ -445,7 +445,7 @@
         const total = cart.reduce((s, i) => s + i.price, 0);
         const orderId = 'UC-' + Math.random().toString(36).substr(2, 4).toUpperCase() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
         await _db.from('orders').insert([{ id: orderId, status: "Awaiting Verification", items: cart.map(i=>i.title).join(", "), total: total.toString() }]);
-        const upi = `upi://pay?pa=YOUR_UPI_ID_HERE@bank&pn=UrbanCulture&am=${total}&cu=INR`;
+        const upi = `upi://pay?pa=johanisgreat@yesfam&pn=UrbanCulture&am=${total}&cu=INR`;
         document.getElementById('qrAmount').innerText = `₹ ${total.toFixed(2)}`;
         document.getElementById('qrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(upi)}`;
         document.getElementById('mobileUpiLink').href = upi;
