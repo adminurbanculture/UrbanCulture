@@ -300,9 +300,19 @@
         const t = document.getElementById('adminTitle').value; const p = document.getElementById('adminPrice').value; const i = document.getElementById('adminImg').value; const f = document.getElementById('adminFile').files[0];
         if(!t || !p || (!i && !f)) return alert("Fill Name, Price and provide an Image");
         let finalImg = i;
-        if(f) { const { data, error } = await _db.storage.from('cars').upload(`public/${Date.now()}_${f.name}`, f); if(!error) { const { data: { publicUrl } } = _db.storage.from('cars').getPublicUrl(data.path); finalImg = publicUrl; } }
+        if(f) {
+            const safeName = f.name.replace(/[^a-zA-Z0-9.]/g, '_');
+            const { data, error } = await _db.storage.from('cars').upload(`public/${Date.now()}_${safeName}`, f);
+            if(error) return alert("Image Upload Error: " + error.message);
+            const { data: { publicUrl } } = _db.storage.from('cars').getPublicUrl(data.path); finalImg = publicUrl;
+        }
         const { error } = await _db.from('products').insert([{ title: t, price: parseInt(p), old_price: p*1.5, img: finalImg, cat: document.getElementById('adminCat').value, tag: document.getElementById('adminTag').value }]);
-        if(!error) { showToast("Showroom Updated Globally"); syncProducts(); }
+        if(!error) {
+            showToast("Showroom Updated Globally"); syncProducts();
+            document.getElementById('adminTitle').value = ''; document.getElementById('adminPrice').value = ''; document.getElementById('adminImg').value = ''; document.getElementById('adminFile').value = '';
+        } else {
+            alert("Database Error: " + error.message);
+        }
     }
 
     async function deleteCar(id) { await _db.from('products').delete().eq('id', id); showToast("Car Deleted"); syncProducts(); }
