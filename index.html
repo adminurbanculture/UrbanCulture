@@ -113,7 +113,7 @@
                 <button id="adminMenuIcon" onclick="toggleAdmin()" class="hidden apple-btn text-gray-400 hover:text-black dark:hover:text-white transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
-                <div class="flex items-center space-x-3 cursor-pointer" onclick="location.reload()">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.href='about.html'">
                     <img src="logo.jpeg" class="w-8 h-8 rounded-lg shadow-sm" alt="Logo">
                     <h1 class="brand-text text-xl md:text-2xl uppercase tracking-wider">UrbanCulture</h1>
                 </div>
@@ -158,10 +158,11 @@
             <input id="adminTitle" type="text" placeholder="Car Name" class="w-full px-5 py-4 rounded-2xl bg-white dark:bg-zinc-800 border-none ring-1 ring-gray-200 dark:ring-zinc-700 outline-none">
             <input id="adminPrice" type="number" placeholder="Price (₹)" class="w-full px-5 py-4 rounded-2xl bg-white dark:bg-zinc-800 border-none ring-1 ring-gray-200 dark:ring-zinc-700 outline-none">
             <input id="adminImg" type="text" placeholder="Image URL" class="w-full px-5 py-4 rounded-2xl bg-white dark:bg-zinc-800 border-none ring-1 ring-gray-200 dark:ring-zinc-700 outline-none">
-            <input id="adminFile" type="file" accept="image/*" class="w-full px-5 py-4 rounded-2xl bg-white dark:bg-zinc-800 border-none ring-1 ring-gray-200 dark:ring-zinc-700 outline-none">
+            <input id="adminFile" type="file" accept="image/*" multiple class="w-full px-5 py-4 rounded-2xl bg-white dark:bg-zinc-800 border-none ring-1 ring-gray-200 dark:ring-zinc-700 outline-none">
             <select id="adminCat" class="w-full px-5 py-4 rounded-2xl bg-white dark:bg-zinc-800 border-none ring-1 ring-gray-200 dark:ring-zinc-700 outline-none appearance-none"><option value="jdm">JDM</option><option value="hyper">KSpec</option><option value="offroad">Offroad</option></select>
             <select id="adminTag" class="w-full px-5 py-4 rounded-2xl bg-white dark:bg-zinc-800 border-none ring-1 ring-gray-200 dark:ring-zinc-700 outline-none appearance-none"><option value="">No Tag</option><option value="sale">ON SALE</option><option value="sold">SOLD OUT!</option><option value="new">NEW!!</option></select>
-            <button onclick="adminAddCar()" class="w-full bg-black dark:bg-white dark:text-black text-white py-4 rounded-2xl font-bold uppercase tracking-widest apple-btn">Global Update</button>
+            <textarea id="adminFeatures" placeholder="Car Features (e.g. 1500HP, Twin Turbo, Full Bodykit)" class="col-span-1 md:col-span-3 w-full px-5 py-4 rounded-2xl bg-white dark:bg-zinc-800 border-none ring-1 ring-gray-200 dark:ring-zinc-700 outline-none min-h-[100px]"></textarea>
+            <button id="adminSubmitBtn" onclick="adminAddCar()" class="col-span-1 md:col-span-3 w-full bg-black dark:bg-white dark:text-black text-white py-4 rounded-2xl font-bold uppercase tracking-widest apple-btn">Global Update</button>
         </div>
     </section>
 
@@ -227,7 +228,8 @@
             <div id="qrLoader">Generating QR...</div>
             <img id="qrImage" src="" alt="QR" class="w-full h-auto border-8 border-white dark:border-zinc-800 rounded-2xl shadow-sm hidden" onload="onQrLoaded()">
         </div>
-        <div class="flex justify-between items-center"><span class="text-gray-400 font-bold text-[9px] uppercase">Total</span><span id="qrAmount" class="text-xl font-black">₹0</span></div>
+        <div class="flex justify-between items-center mb-6"><span class="text-gray-400 font-bold text-[9px] uppercase">Total</span><span id="qrAmount" class="text-xl font-black">₹ 0</span></div>
+        <a id="mobileUpiLink" href="#" class="w-full block bg-black dark:bg-white dark:text-black text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-sm shadow-xl hover:scale-105 active:scale-95 transition-transform">Pay via UPI App</a>
     </div>
 </div>
 
@@ -251,20 +253,29 @@
     </div>
 </div>
 
-<div id="productModal" class="bottom-sheet fixed bottom-0 left-0 right-0 lg:left-auto lg:right-0 lg:top-0 lg:bottom-0 lg:w-[500px] lg:h-full lg:rounded-none bg-white rounded-t-[2.5rem] z-[70] overflow-hidden shadow-2xl">
-    <div class="p-8 h-full overflow-y-auto relative flex flex-col items-center sm:items-start text-center sm:text-left">
-        <button onclick="closeModal()" class="absolute top-7 right-7 text-gray-400 hover:text-black dark:hover:text-white apple-btn"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button>
-        <div class="aspect-video w-full bg-gray-100 dark:bg-zinc-900 rounded-3xl overflow-hidden mb-8 shadow-inner"><img id="modalImg" src="" class="w-full h-full object-cover"></div>
-        <h3 id="modalTitle" class="text-3xl font-black uppercase tracking-tighter mb-2"></h3>
-        <p id="modalPrice" class="text-3xl font-black mb-8">₹0</p>
-        <button id="modalAddToCart" class="w-full py-5 bg-black dark:bg-white dark:text-black text-white font-bold uppercase rounded-2xl shadow-xl active:scale-[0.98] transition-all">Add to Garage</button>
+<div id="productModal" class="fixed inset-0 z-[100] bg-white dark:bg-black transform scale-95 opacity-0 pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.43,0.05,0.1,1.1)] flex flex-col lg:flex-row overflow-hidden">
+    <button onclick="closeModal()" class="absolute top-6 right-6 lg:top-10 lg:right-10 z-[110] w-12 h-12 bg-black/10 dark:bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-black dark:text-white hover:scale-110 transition-transform apple-btn"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+    <div class="w-full lg:w-1/2 h-[50vh] lg:h-full relative group">
+        <img id="modalImg" src="" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none lg:hidden"></div>
+        <button id="modalPrev" onclick="navSlide(-1)" class="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/30 backdrop-blur-md text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hidden"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+        <button id="modalNext" onclick="navSlide(1)" class="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/30 backdrop-blur-md text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hidden"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
+    </div>
+    <div class="w-full lg:w-1/2 h-[50vh] lg:h-full overflow-y-auto p-8 lg:p-16 flex flex-col justify-center bg-white dark:bg-zinc-950 relative z-10">
+        <h3 id="modalTitle" class="text-4xl lg:text-7xl font-brand uppercase tracking-tighter mb-4 leading-none text-black dark:text-white"></h3>
+        <p id="modalPrice" class="text-3xl font-black mb-10 text-gray-400">₹ 0</p>
+        <div class="mb-10">
+            <h4 class="text-sm font-black uppercase tracking-widest text-gray-400 mb-4 border-b border-gray-100 dark:border-zinc-800 pb-2">Vehicle Configuration</h4>
+            <ul id="modalFeatures" class="space-y-4 mt-6"></ul>
+        </div>
+        <button id="modalAddToCart" class="w-full lg:w-auto px-12 py-5 bg-black dark:bg-white dark:text-black text-white font-bold uppercase tracking-widest rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-transform text-lg mt-auto lg:mt-0 self-start apple-btn">Acquire Vehicle</button>
     </div>
 </div>
 
 <div id="cartDrawer" class="cart-drawer fixed top-0 right-0 bottom-0 w-full max-w-[420px] bg-white z-[70] flex flex-col shadow-2xl border-l border-gray-100/10">
     <div class="p-10 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between font-black uppercase tracking-tighter text-3xl italic">My Garage <button onclick="closeCart()" class="p-2 apple-btn"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button></div>
     <div id="cartItems" class="flex-1 overflow-y-auto p-10 space-y-10"></div>
-    <div class="p-10 border-t border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50"><div class="flex justify-between items-center mb-10 font-black tracking-tighter text-4xl italic">₹ <span id="cartSubtotal">0.00</span></div><button id="checkoutBtn" class="w-full py-6 bg-black dark:bg-white dark:text-black text-white font-bold uppercase rounded-3xl shadow-2xl apple-btn">Finalize Purchase</button></div>
+    <div class="p-10 border-t border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50"><div class="flex justify-between items-center mb-10 font-black tracking-tighter text-4xl"><span class="text-xl text-gray-400 uppercase tracking-widest font-bold">Total</span><span>₹ <span id="cartSubtotal">0.00</span></span></div><button id="checkoutBtn" class="w-full py-6 bg-black dark:bg-white dark:text-black text-white font-bold uppercase rounded-3xl shadow-2xl apple-btn">Finalize Purchase</button></div>
 </div>
 
 <script>
@@ -296,36 +307,130 @@
     function logout() { currentUser = null; localStorage.removeItem('uc_user'); updateAuthUI(); showToast("Logged Out"); }
     function toggleAdmin() { document.getElementById('adminPanel').classList.toggle('active'); renderGrid(); }
 
+    let editingCarId = null;
+    function editCar(id) {
+        const p = products.find(c => c.id === id); if(!p) return;
+        editingCarId = id;
+        document.getElementById('adminTitle').value = p.title;
+        document.getElementById('adminPrice').value = p.price;
+        document.getElementById('adminImg').value = p.img;
+        document.getElementById('adminCat').value = p.cat;
+        document.getElementById('adminTag').value = p.tag || '';
+        document.getElementById('adminFeatures').value = p.features || '';
+        document.getElementById('adminSubmitBtn').innerText = "Update Car";
+        document.getElementById('adminPanel').scrollIntoView({behavior:'smooth'});
+    }
+
     async function adminAddCar() {
-        const t = document.getElementById('adminTitle').value; const p = document.getElementById('adminPrice').value; const i = document.getElementById('adminImg').value; const f = document.getElementById('adminFile').files[0];
-        if(!t || !p || (!i && !f)) return alert("Fill Name, Price and provide an Image");
+        const t = document.getElementById('adminTitle').value; const p = document.getElementById('adminPrice').value; const i = document.getElementById('adminImg').value; const f = document.getElementById('adminFile').files;
+        const feats = document.getElementById('adminFeatures').value || '';
+        if(!t || !p || (!i && f.length === 0)) return alert("Fill Name, Price and provide an Image");
         let finalImg = i;
-        if(f) {
-            const safeName = f.name.replace(/[^a-zA-Z0-9.]/g, '_');
-            const { data, error } = await _db.storage.from('cars').upload(`public/${Date.now()}_${safeName}`, f);
-            if(error) return alert("Image Upload Error: " + error.message);
-            const { data: { publicUrl } } = _db.storage.from('cars').getPublicUrl(data.path); finalImg = publicUrl;
+        if(f.length > 0) {
+            let urls = [];
+            for (let idx = 0; idx < f.length; idx++) {
+                const file = f[idx];
+                const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+                const { data, error } = await _db.storage.from('cars').upload(`public/${Date.now()}_${safeName}`, file);
+                if(error) return alert("Image Upload Error: " + error.message);
+                const { data: { publicUrl } } = _db.storage.from('cars').getPublicUrl(data.path); urls.push(publicUrl);
+            }
+            finalImg = urls.join(',');
         }
-        const { error } = await _db.from('products').insert([{ title: t, price: parseInt(p), old_price: p*1.5, img: finalImg, cat: document.getElementById('adminCat').value, tag: document.getElementById('adminTag').value }]);
+        
+        let error;
+        if (editingCarId) {
+            const { error: updateError } = await _db.from('products').update({ title: t, price: parseInt(p), old_price: p*1.5, img: finalImg, cat: document.getElementById('adminCat').value, tag: document.getElementById('adminTag').value, features: feats }).eq('id', editingCarId);
+            error = updateError;
+        } else {
+            const { error: insertError } = await _db.from('products').insert([{ title: t, price: parseInt(p), old_price: p*1.5, img: finalImg, cat: document.getElementById('adminCat').value, tag: document.getElementById('adminTag').value, features: feats }]);
+            error = insertError;
+        }
+
         if(!error) {
-            showToast("Showroom Updated Globally"); syncProducts();
-            document.getElementById('adminTitle').value = ''; document.getElementById('adminPrice').value = ''; document.getElementById('adminImg').value = ''; document.getElementById('adminFile').value = '';
+            showToast(editingCarId ? "Car Updated" : "Showroom Updated Globally"); syncProducts();
+            document.getElementById('adminTitle').value = ''; document.getElementById('adminPrice').value = ''; document.getElementById('adminImg').value = ''; document.getElementById('adminFile').value = ''; document.getElementById('adminFeatures').value = '';
+            editingCarId = null;
+            document.getElementById('adminSubmitBtn').innerText = "Global Update";
         } else {
             alert("Database Error: " + error.message);
         }
     }
 
     async function deleteCar(id) { await _db.from('products').delete().eq('id', id); showToast("Car Deleted"); syncProducts(); }
-    function filterCars(cat) { currentFilter = cat; document.querySelectorAll('.cat-btn').forEach(btn => { const match = (cat === 'all' && btn.innerText.includes('All')); btn.classList.toggle('bg-black', match || btn.innerText.toLowerCase().includes(cat)); btn.classList.toggle('dark:bg-white', match || btn.innerText.toLowerCase().includes(cat)); btn.classList.toggle('dark:text-black', match || btn.innerText.toLowerCase().includes(cat)); btn.classList.toggle('text-white', match || btn.innerText.toLowerCase().includes(cat)); btn.classList.toggle('bg-gray-100', !match && !btn.innerText.toLowerCase().includes(cat)); btn.classList.toggle('dark:bg-zinc-800', !match && !btn.innerText.toLowerCase().includes(cat)); btn.classList.toggle('text-black', !match && !btn.innerText.toLowerCase().includes(cat)); }); renderGrid(); setTimeout(() => els.grid.scrollIntoView({behavior:'smooth', block:'start'}), 100); }
-    function renderGrid() { els.grid.innerHTML = ''; const filtered = currentFilter === 'all' ? products : products.filter(p => p.cat === currentFilter); filtered.forEach(p => { const isAdmin = currentUser?.isAdmin && document.getElementById('adminPanel').classList.contains('active'); let badge = p.tag ? `<div class="badge badge-${p.tag}">${p.tag === 'sale' ? 'ON SALE' : (p.tag === 'sold' ? 'SOLD OUT!' : 'NEW!!')}</div>` : ''; const card = document.createElement('div'); card.className = 'product-card group cursor-pointer reveal flex flex-col items-center text-center'; card.innerHTML = `<div class="aspect-[1.5/1] w-full bg-gray-100 dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden mb-5 relative shadow-sm transition-all">${badge}${isAdmin ? `<button onclick="event.stopPropagation(); deleteCar(${p.id})" class="absolute top-4 right-4 bg-red-500 text-white w-9 h-9 rounded-full z-20 flex items-center justify-center shadow-lg font-bold">×</button>` : ''}<img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-[1s] ease-out"><div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div><button onclick="event.stopPropagation(); quickAdd(${p.id})" class="absolute bottom-6 right-6 w-14 h-14 glass-btn text-black rounded-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all shadow-xl"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg></button></div><div class="px-2 w-full"><h3 class="text-[15px] font-black uppercase mb-1 tracking-tight leading-none">${p.title}</h3><div class="flex items-center space-x-3 justify-center"><span class="text-xl font-black tracking-tighter">₹${p.price}</span><span class="text-xs text-gray-400 line-through">₹${Math.round(p.old_price)}</span></div></div>`; card.onclick = () => openModal(p); els.grid.appendChild(card); }); }
-    function openModal(p) { selectedProduct = p; document.getElementById('modalImg').src = p.img; document.getElementById('modalTitle').innerText = p.title; document.getElementById('modalPrice').innerText = `₹${p.price}`; els.modal.classList.add('active'); els.overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
-    function closeModal() { els.modal.classList.remove('active'); checkOverlay(); document.body.style.overflow = 'auto'; }
+    function filterCars(cat) { currentFilter = cat; document.querySelectorAll('.cat-btn').forEach(btn => { const isMatch = btn.getAttribute('onclick').includes(`'${cat}'`); btn.classList.toggle('bg-black', isMatch); btn.classList.toggle('dark:bg-white', isMatch); btn.classList.toggle('dark:text-black', isMatch); btn.classList.toggle('text-white', isMatch); btn.classList.toggle('bg-gray-100', !isMatch); btn.classList.toggle('dark:bg-zinc-800', !isMatch); btn.classList.toggle('text-black', !isMatch); }); renderGrid(); setTimeout(() => els.grid.scrollIntoView({behavior:'smooth', block:'start'}), 100); }
+    let hoverIntervals = new Map();
+    function startHoverSlide(imgEl, imgStr) {
+        const imgs = imgStr.split(',');
+        if (imgs.length <= 1) return;
+        let i = 0;
+        hoverIntervals.set(imgEl, setInterval(() => {
+            i = (i + 1) % imgs.length;
+            imgEl.src = imgs[i];
+        }, 1500));
+    }
+    function stopHoverSlide(imgEl, firstImg) {
+        if (hoverIntervals.has(imgEl)) {
+            clearInterval(hoverIntervals.get(imgEl));
+            hoverIntervals.delete(imgEl);
+        }
+        imgEl.src = firstImg;
+    }
+
+    function renderGrid() { els.grid.innerHTML = ''; const filtered = currentFilter === 'all' ? products : products.filter(p => p.cat === currentFilter); filtered.forEach(p => { const isAdmin = currentUser?.isAdmin && document.getElementById('adminPanel').classList.contains('active'); let badge = p.tag ? `<div class="badge badge-${p.tag}">${p.tag === 'sale' ? 'ON SALE' : (p.tag === 'sold' ? 'SOLD OUT!' : 'NEW!!')}</div>` : ''; const card = document.createElement('div'); card.className = 'product-card group cursor-pointer reveal flex flex-col items-center text-center'; card.innerHTML = `<div class="aspect-[3/4] w-full bg-gray-100 dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden mb-5 relative shadow-sm transition-all">${badge}${isAdmin ? `<div class="absolute top-4 right-4 z-20 flex flex-col gap-2"><button onclick="event.stopPropagation(); deleteCar(${p.id})" class="bg-red-500 text-white w-9 h-9 rounded-full flex items-center justify-center shadow-lg font-bold">×</button><button onclick="event.stopPropagation(); editCar(${p.id})" class="bg-black text-white w-9 h-9 rounded-full flex items-center justify-center shadow-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button></div>` : ''}<img src="${p.img.split(',')[0]}" onmouseenter="startHoverSlide(this, '${p.img}')" onmouseleave="stopHoverSlide(this, '${p.img.split(',')[0]}')" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-[1s] ease-out"><div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div><button onclick="event.stopPropagation(); quickAdd(${p.id})" class="absolute bottom-6 right-6 w-14 h-14 glass-btn text-black rounded-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all shadow-xl"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg></button></div><div class="px-2 w-full"><h3 class="text-[15px] font-black uppercase mb-1 tracking-tight leading-none">${p.title}</h3><div class="flex items-center space-x-3 justify-center"><span class="text-xl font-black tracking-tighter">₹${p.price}</span><span class="text-xs text-gray-400 line-through">₹${Math.round(p.old_price)}</span></div></div>`; card.onclick = () => openModal(p); els.grid.appendChild(card); }); }
+    let slideInterval;
+    let currentSlide = 0;
+    let modalImgs = [];
+
+    function openModal(p) {
+        selectedProduct = p; modalImgs = p.img.split(','); currentSlide = 0;
+        document.getElementById('modalImg').src = modalImgs[0];
+        document.getElementById('modalTitle').innerText = p.title;
+        document.getElementById('modalPrice').innerText = `₹${p.price}`;
+
+        const featList = document.getElementById('modalFeatures');
+        featList.innerHTML = '';
+        if (p.features) {
+            p.features.split(',').forEach(f => {
+                const text = f.trim();
+                if (text) featList.innerHTML += `<li class="flex items-center space-x-3"><svg class="w-5 h-5 text-black dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg><span class="text-black dark:text-gray-300">${text}</span></li>`;
+            });
+        } else {
+            featList.innerHTML = `<li class="text-gray-400 italic">No features listed.</li>`;
+        }
+
+        clearInterval(slideInterval);
+
+        const prevBtn = document.getElementById('modalPrev');
+        const nextBtn = document.getElementById('modalNext');
+
+        if(modalImgs.length > 1) {
+            prevBtn.classList.remove('hidden');
+            nextBtn.classList.remove('hidden');
+            slideInterval = setInterval(() => navSlide(1), 2500);
+        } else {
+            prevBtn.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+        }
+
+        els.modal.classList.remove('scale-95', 'opacity-0', 'pointer-events-none'); els.modal.classList.add('scale-100', 'opacity-100', 'pointer-events-auto'); els.overlay.classList.add('active'); document.body.style.overflow = 'hidden';
+    }
+
+        function navSlide(dir) {
+        if (modalImgs.length <= 1) return;
+        currentSlide = (currentSlide + dir + modalImgs.length) % modalImgs.length;
+        document.getElementById('modalImg').src = modalImgs[currentSlide];
+        // Reset interval if manually clicked to prevent instant jump
+        clearInterval(slideInterval);
+        slideInterval = setInterval(() => navSlide(1), 2500);
+        }
+        function closeModal() { clearInterval(slideInterval); els.modal.classList.add('scale-95', 'opacity-0', 'pointer-events-none'); els.modal.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto'); checkOverlay(); document.body.style.overflow = 'auto'; }
     function openCart() { els.cart.classList.add('active'); els.overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
     function closeCart() { els.cart.classList.remove('active'); checkOverlay(); document.body.style.overflow = 'auto'; }
     function checkOverlay() { if(!els.cart.classList.contains('active') && !els.auth.classList.contains('active') && !els.track.classList.contains('active') && !els.qr.classList.contains('active') && !els.info.classList.contains('active')) els.overlay.classList.remove('active'); }
     function quickAdd(id) { addToCart(products.find(p => p.id === id)); }
     function addToCart(p) { if(p.tag === 'sold') return showToast("SOLD OUT!"); cart.push({ ...p, uid: Date.now() + Math.random() }); updateUI(); showToast("Added: " + p.title); closeModal(); }
-    function updateUI() { els.items.innerHTML = ''; let t = 0; cart.forEach(item => { t += item.price; const el = document.createElement('div'); el.className = 'flex items-center justify-between space-x-6'; el.innerHTML = `<div class="flex items-center space-x-6"><div class="w-24 h-24 bg-gray-50 dark:bg-zinc-800 rounded-3xl overflow-hidden flex-shrink-0 shadow-inner"><img src="${item.img}" class="w-full h-full object-cover"></div><div class="flex-1"><h4 class="text-xs font-black uppercase mb-1 leading-none">${item.title}</h4><p class="text-lg font-black tracking-tighter">₹${item.price}</p></div></div><button onclick="removeFromCart(${item.uid})" class="text-gray-200 hover:text-red-500 transition-colors"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>`; els.items.appendChild(el); }); els.count.innerText = cart.length; els.total.innerText = t.toFixed(2); }
+    function updateUI() { els.items.innerHTML = ''; let t = 0; cart.forEach(item => { t += item.price; const el = document.createElement('div'); el.className = 'flex items-center justify-between space-x-6'; el.innerHTML = `<div class="flex items-center space-x-6"><div class="w-24 h-24 bg-gray-50 dark:bg-zinc-800 rounded-3xl overflow-hidden flex-shrink-0 shadow-inner"><img src="${item.img.split(',')[0]}" class="w-full h-full object-cover"></div><div class="flex-1"><h4 class="text-xs font-black uppercase mb-1 leading-none">${item.title}</h4><p class="text-lg font-black tracking-tighter">₹ ${item.price}</p></div></div><button onclick="removeFromCart(${item.uid})" class="text-gray-200 hover:text-red-500 transition-colors"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>`; els.items.appendChild(el); }); els.count.innerText = cart.length; els.total.innerText = t.toFixed(2); }
     function removeFromCart(uid) { cart = cart.filter(x => x.uid !== uid); updateUI(); }
     function openTrackModal() { els.track.classList.add('active'); els.overlay.classList.add('active'); document.getElementById('trackResult').classList.add('hidden'); }
     function closeTrackModal() { els.track.classList.remove('active'); checkOverlay(); }
@@ -341,8 +446,9 @@
         const orderId = 'UC-' + Math.random().toString(36).substr(2, 4).toUpperCase() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
         await _db.from('orders').insert([{ id: orderId, status: "Awaiting Verification", items: cart.map(i=>i.title).join(", "), total: total.toString() }]);
         const upi = `upi://pay?pa=YOUR_UPI_ID_HERE@bank&pn=UrbanCulture&am=${total}&cu=INR`;
-        document.getElementById('qrAmount').innerText = `₹${total.toFixed(2)}`;
+        document.getElementById('qrAmount').innerText = `₹ ${total.toFixed(2)}`;
         document.getElementById('qrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(upi)}`;
+        document.getElementById('mobileUpiLink').href = upi;
         els.qr.classList.add('active'); els.overlay.classList.add('active');
     };
     
@@ -351,7 +457,5 @@
     if(localStorage.getItem('uc_theme') === 'dark') toggleDarkMode();
     updateAuthUI(); syncProducts();
 </script>
-</body>
-</html>ipt>
 </body>
 </html>
