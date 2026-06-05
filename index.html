@@ -479,13 +479,24 @@
     els.overlay.onclick = () => { closeCart(); closeModal(); closeInfo(); closeQr(); closeTrackModal(); closeAuthModal(); };
     document.getElementById('modalAddToCart').onclick = () => addToCart(selectedProduct);
     if(localStorage.getItem('uc_theme') === 'dark') toggleDarkMode();
-    _db.auth.onAuthStateChange(async (event, session) => {
+    async function initAuth() {
+        const { data: { session } } = await _db.auth.getSession();
         if(session?.user) {
             const isAdmin = await checkAdmin(session.user.email);
             currentUser = { email: session.user.email, name: session.user.user_metadata?.full_name || session.user.email.split('@')[0], isAdmin };
         } else { currentUser = null; }
         updateAuthUI();
-    });
+        
+        _db.auth.onAuthStateChange(async (event, session) => {
+            if(event === 'INITIAL_SESSION') return;
+            if(session?.user) {
+                const isAdmin = await checkAdmin(session.user.email);
+                currentUser = { email: session.user.email, name: session.user.user_metadata?.full_name || session.user.email.split('@')[0], isAdmin };
+            } else { currentUser = null; }
+            updateAuthUI();
+        });
+    }
+    initAuth();
     syncProducts();
 </script>
 </body>
