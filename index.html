@@ -167,6 +167,11 @@
             <select id="adminTag" class="w-full px-5 py-4 rounded-2xl bg-white dark:bg-zinc-800 border-none ring-1 ring-gray-200 dark:ring-zinc-700 outline-none appearance-none"><option value="">No Tag</option><option value="sale">ON SALE</option><option value="sold">SOLD OUT!</option><option value="new">NEW!!</option></select>
             <textarea id="adminFeatures" placeholder="Car Features (e.g. 1500HP, Twin Turbo, Full Bodykit)" class="col-span-1 md:col-span-3 w-full px-5 py-4 rounded-2xl bg-white dark:bg-zinc-800 border-none ring-1 ring-gray-200 dark:ring-zinc-700 outline-none min-h-[100px]"></textarea>
             <button id="adminSubmitBtn" onclick="adminAddCar()" class="col-span-1 md:col-span-3 w-full bg-black dark:bg-white dark:text-black text-white py-4 rounded-2xl font-bold uppercase tracking-widest apple-btn">Global Update</button>
+        <div class="mt-12 border-t border-gray-200 dark:border-zinc-700 pt-8">
+            <h4 class="text-xl font-black uppercase mb-6 tracking-widest text-black dark:text-white">Order Management</h4>
+            <div id="adminOrdersList" class="space-y-4">
+                <p class="text-gray-400 font-bold uppercase tracking-widest text-sm">Loading orders...</p>
+            </div>
         </div>
     </section>
 
@@ -334,7 +339,29 @@
     async function supabaseLogin() { const e = document.getElementById('loginId').value; const p = document.getElementById('loginPass').value; if(!e || !p) return showToast('Enter email and password'); const { error } = await _db.auth.signInWithPassword({ email: e, password: p }); if(error) return showToast('Login failed: ' + error.message); closeAuthModal(); }
     async function supabaseSignup() { const e = document.getElementById('loginId').value; const p = document.getElementById('loginPass').value; if(!e || !p) return showToast('Enter email and password'); const { data, error } = await _db.auth.signUp({ email: e, password: p }); if(error) return showToast('Signup failed: ' + error.message); showToast('Account created! Check email to verify.'); closeAuthModal(); }
     async function logout() { await _db.auth.signOut(); showToast('Logged Out'); }
-    function toggleAdmin() { document.getElementById('adminPanel').classList.toggle('active'); renderGrid(); }
+    function toggleAdmin() { document.getElementById('adminPanel').classList.toggle('active'); renderGrid(); if(document.getElementById('adminPanel').classList.contains('active')) adminFetchOrders(); }
+
+    async function adminFetchOrders() {
+        const { data, error } = await _db.from('orders').select('*').order('id', { ascending: false });
+        if(error || !data) return;
+        const list = document.getElementById('adminOrdersList');
+        list.innerHTML = data.map(o => `
+            <div class="bg-white dark:bg-zinc-800 p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center border border-gray-100 dark:border-zinc-700 shadow-sm">
+                <div>
+                    <p class="font-bold text-apple-blue uppercase tracking-widest text-xs mb-1">${o.id}</p>
+                    <p class="text-lg font-black text-black dark:text-white">${o.items}</p>
+                    <p class="text-[11px] text-gray-500 font-bold uppercase mt-2">₹${o.total} &nbsp;&bull;&nbsp; Status: <span class="${o.status.includes('Paid') ? 'text-green-500' : 'text-orange-500'}">${o.status}</span></p>
+                </div>
+                ${o.status === 'Awaiting Verification' ? `<button onclick="adminMarkPaid('${o.id}')" class="mt-4 md:mt-0 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-bold uppercase rounded-xl apple-btn text-xs tracking-widest hover:scale-105 transition-transform">Mark as Paid</button>` : `<span class="mt-4 md:mt-0 px-6 py-3 bg-gray-100 dark:bg-zinc-900 text-gray-400 font-bold uppercase rounded-xl text-xs tracking-widest border border-gray-200 dark:border-zinc-800">Verified</span>`}
+            </div>
+        `).join('') || '<p class="text-gray-400 font-bold uppercase tracking-widest text-sm">No pending orders.</p>';
+    }
+
+    async function adminMarkPaid(id) {
+        if(!confirm('Mark order ' + id + ' as Paid & Ready for Delivery?')) return;
+        const { error } = await _db.from('orders').update({ status: 'Paid & Ready for Delivery' }).eq('id', id);
+        if(!error) { showToast('Order Updated!'); adminFetchOrders(); } else { showToast('Update Failed: ' + error.message); }
+    }
 
     let editingCarId = null;
     function editCar(id) {
