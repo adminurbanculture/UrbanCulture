@@ -124,7 +124,7 @@
                     <svg id="themeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
                 </button>
                 <a href="https://instagram.com/urbanculture.___" target="_blank" class="p-2 apple-btn text-gray-400 hover:text-black dark:hover:text-white hidden sm:block"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5z"></path><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zM17.5 6.5h.01"></path></svg></a>
-                <a href="about.html" class="p-2 apple-btn text-gray-400 hover:text-black dark:hover:text-white hidden sm:block text-[11px] font-bold uppercase tracking-widest">About</a>
+                <a href="about.html" class="p-2 apple-btn text-gray-400 hover:text-black dark:hover:text-white block sm:block text-[11px] font-bold uppercase tracking-widest">About</a>
                 <button id="authBtn" onclick="openAuthModal()" class="p-2 apple-btn text-gray-400 hover:text-black dark:hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg></button>
                 <button onclick="openCart()" class="p-2 relative apple-btn"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg><span id="cartCount" class="absolute top-1 right-1 bg-black dark:bg-white dark:text-black text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span></button>
             </div>
@@ -460,7 +460,7 @@
         const total = cart.reduce((s, i) => s + i.price, 0);
         const orderId = 'UC-' + Math.random().toString(36).substr(2, 4).toUpperCase() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
         await _db.from('orders').insert([{ id: orderId, status: "Awaiting Verification", items: cart.map(i=>i.title).join(", "), total: total.toString() }]);
-        const upi = `upi://pay?pa=johanisgreat@yesfam&pn=UrbanCulture&am=${total.toFixed(2)}&cu=INR`;
+        const upi = `upi://pay?pa=johanisgreat@yesfam&pn=UrbanCulture&mc=0000&tr=${orderId.replace(/-/g, '')}&am=${total.toFixed(2)}&cu=INR`;
         document.getElementById('qrAmount').innerText = `₹ ${total.toFixed(2)}`;
         document.getElementById('qrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(upi)}`;
         document.getElementById('mobileUpiLink').href = upi;
