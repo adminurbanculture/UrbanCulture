@@ -168,8 +168,8 @@
             <textarea id="adminFeatures" placeholder="Car Features (e.g. 1500HP, Twin Turbo, Full Bodykit)" class="col-span-1 md:col-span-3 w-full px-5 py-4 rounded-2xl bg-white dark:bg-zinc-800 border-none ring-1 ring-gray-200 dark:ring-zinc-700 outline-none min-h-[100px]"></textarea>
             <button id="adminSubmitBtn" onclick="adminAddCar()" class="col-span-1 md:col-span-3 w-full bg-black dark:bg-white dark:text-black text-white py-4 rounded-2xl font-bold uppercase tracking-widest apple-btn">Global Update</button>
         <div class="mt-12 border-t border-gray-200 dark:border-zinc-700 pt-8">
-            <h4 class="text-xl font-black uppercase mb-6 tracking-widest text-black dark:text-white">Order Management</h4>
-            <div id="adminOrdersList" class="space-y-4">
+            <h4 class="text-xl font-black uppercase mb-4 tracking-widest text-black dark:text-white">Order Management</h4>
+            <div id="adminOrdersList" class="space-y-2 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
                 <p class="text-gray-400 font-bold uppercase tracking-widest text-sm">Loading orders...</p>
             </div>
         </div>
@@ -346,13 +346,19 @@
         if(error || !data) return;
         const list = document.getElementById('adminOrdersList');
         list.innerHTML = data.map(o => `
-            <div class="bg-white dark:bg-zinc-800 p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center border border-gray-100 dark:border-zinc-700 shadow-sm">
-                <div>
-                    <p class="font-bold text-apple-blue uppercase tracking-widest text-xs mb-1">${o.id}</p>
-                    <p class="text-lg font-black text-black dark:text-white">${o.items}</p>
-                    <p class="text-[11px] text-gray-500 font-bold uppercase mt-2">₹${o.total} &nbsp;&bull;&nbsp; Status: <span class="${o.status.includes('Paid') ? 'text-green-500' : 'text-orange-500'}">${o.status}</span></p>
+            <div class="bg-white dark:bg-zinc-800 p-3 rounded-xl flex items-center justify-between border border-gray-100 dark:border-zinc-700 shadow-sm gap-4">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-0.5">
+                        <span class="font-bold text-apple-blue uppercase tracking-widest text-[10px] whitespace-nowrap">${o.id}</span>
+                        <span class="text-[9px] font-bold uppercase ${o.status.includes('Paid') ? 'text-green-500 bg-green-500/10' : 'text-orange-500 bg-orange-500/10'} truncate px-1.5 py-0.5 rounded-md">${o.status}</span>
+                    </div>
+                    <p class="text-xs font-black text-black dark:text-white truncate" title="${o.items}">${o.items}</p>
+                    <p class="text-[10px] text-gray-500 font-bold uppercase mt-0.5">₹${o.total}</p>
                 </div>
-                ${o.status === 'Awaiting Verification' ? `<button onclick="adminMarkPaid('${o.id}')" class="mt-4 md:mt-0 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-bold uppercase rounded-xl apple-btn text-xs tracking-widest hover:scale-105 transition-transform">Mark as Paid</button>` : `<span class="mt-4 md:mt-0 px-6 py-3 bg-gray-100 dark:bg-zinc-900 text-gray-400 font-bold uppercase rounded-xl text-xs tracking-widest border border-gray-200 dark:border-zinc-800">Verified</span>`}
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    ${o.status === 'Awaiting Verification' ? `<button onclick="adminMarkPaid('${o.id}')" class="px-3 py-1.5 bg-black dark:bg-white text-white dark:text-black font-bold uppercase rounded-lg apple-btn text-[10px] tracking-widest hover:scale-105 transition-transform">Verify</button>` : ``}
+                    <button onclick="adminDeleteOrder('${o.id}')" class="p-1.5 text-gray-400 hover:text-red-500 bg-gray-50 dark:bg-zinc-900 rounded-lg transition-colors" title="Delete Order"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                </div>
             </div>
         `).join('') || '<p class="text-gray-400 font-bold uppercase tracking-widest text-sm">No pending orders.</p>';
     }
@@ -360,7 +366,13 @@
     async function adminMarkPaid(id) {
         if(!confirm('Mark order ' + id + ' as Paid & Ready for Delivery?')) return;
         const { error } = await _db.from('orders').update({ status: 'Paid & Ready for Delivery' }).eq('id', id);
-        if(!error) { showToast('Order Updated!'); adminFetchOrders(); } else { showToast('Update Failed: ' + error.message); }
+        if(!error) { showToast('Order Verified!'); adminFetchOrders(); } else { showToast('Update Failed: ' + error.message); }
+    }
+
+    async function adminDeleteOrder(id) {
+        if(!confirm('Delete order ' + id + '? This cannot be undone.')) return;
+        const { error } = await _db.from('orders').delete().eq('id', id);
+        if(!error) { showToast('Order Deleted'); adminFetchOrders(); } else { showToast('Delete Failed: ' + error.message); }
     }
 
     let editingCarId = null;
