@@ -8,6 +8,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() { emailjs.init("N8H_FL1JRyFN2GbZG"); })();
+    </script>
     <!-- Pirata One for Gothic Logo, Anton for titles, Inter for UI -->
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Pirata+One&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
@@ -151,12 +155,18 @@
             </div>
         </header>
 
-        <nav class="flex overflow-x-auto no-scrollbar py-3 px-4 md:px-12 space-x-3 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-100/10 justify-start sm:justify-center">
-            <button onclick="filterCars('all')" class="cat-btn px-6 py-2 bg-black dark:bg-white dark:text-black text-white rounded-full text-[11px] font-bold whitespace-nowrap apple-btn">All Cars</button>
-            <button onclick="filterCars('hyper')" class="cat-btn px-6 py-2 bg-gray-100 dark:bg-zinc-800 text-black dark:text-white rounded-full text-[11px] font-bold whitespace-nowrap apple-btn">KSpec</button>
-            <button onclick="filterCars('jdm')" class="cat-btn px-6 py-2 bg-gray-100 dark:bg-zinc-800 text-black dark:text-white rounded-full text-[11px] font-bold whitespace-nowrap apple-btn">JDM</button>
-            <button onclick="filterCars('offroad')" class="cat-btn px-6 py-2 bg-gray-100 dark:bg-zinc-800 text-black dark:text-white rounded-full text-[11px] font-bold whitespace-nowrap apple-btn">Offroad</button>
-        </nav>
+        <div class="bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-100/10 py-3 px-4 md:px-12 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <nav class="flex overflow-x-auto no-scrollbar space-x-3 w-full sm:w-auto">
+                <button onclick="filterCars('all')" class="cat-btn px-6 py-2 bg-black dark:bg-white dark:text-black text-white rounded-full text-[11px] font-bold whitespace-nowrap apple-btn">All Cars</button>
+                <button onclick="filterCars('hyper')" class="cat-btn px-6 py-2 bg-gray-100 dark:bg-zinc-800 text-black dark:text-white rounded-full text-[11px] font-bold whitespace-nowrap apple-btn">KSpec</button>
+                <button onclick="filterCars('jdm')" class="cat-btn px-6 py-2 bg-gray-100 dark:bg-zinc-800 text-black dark:text-white rounded-full text-[11px] font-bold whitespace-nowrap apple-btn">JDM</button>
+                <button onclick="filterCars('offroad')" class="cat-btn px-6 py-2 bg-gray-100 dark:bg-zinc-800 text-black dark:text-white rounded-full text-[11px] font-bold whitespace-nowrap apple-btn">Offroad</button>
+            </nav>
+            <div class="relative w-full sm:w-64">
+                <input type="text" id="searchInput" oninput="searchCars(this.value)" placeholder="Search cars..." class="w-full bg-gray-100 dark:bg-zinc-900 text-black dark:text-white px-4 py-2 rounded-full text-[13px] font-bold outline-none border border-transparent focus:border-gray-300 dark:focus:border-zinc-700 transition-colors">
+                <svg class="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+        </div>
     </div>
 
     <!-- Hero Section -->
@@ -350,7 +360,7 @@
     function closeAuthModal() { els.auth.classList.remove('active'); checkOverlay(); }
     function openMobileMenu() { els.mobileMenu.classList.add('active'); els.overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
     function closeMobileMenu() { els.mobileMenu.classList.remove('active'); checkOverlay(); document.body.style.overflow = 'auto'; }
-    const _ADMIN_EMAILS = ['admin@urbanculture.com'];
+    const _ADMIN_EMAILS = ['tripxhaust@gmail.com'];
     async function checkAdmin(email) { if(_ADMIN_EMAILS.includes(email.toLowerCase())) return true; try { const { data, error } = await _db.from('admins').select('email').eq('email', email).maybeSingle(); if(error) return false; return !!data; } catch(e) { return false; } }
     let authMode = 'login';
     function toggleAuthMode() { authMode = authMode === 'login' ? 'signup' : 'login'; document.getElementById('authTitle').innerText = authMode === 'login' ? 'Login' : 'Sign Up'; document.getElementById('authSubmitBtn').innerText = authMode === 'login' ? 'Login' : 'Sign Up'; document.getElementById('authSubmitBtn').setAttribute('onclick', authMode === 'login' ? 'supabaseLogin()' : 'supabaseSignup()'); document.getElementById('authToggleText').innerText = authMode === 'login' ? "Don't have an account?" : 'Already have an account?'; document.getElementById('authToggleBtn').innerText = authMode === 'login' ? 'Sign Up' : 'Login'; }
@@ -383,8 +393,18 @@
 
     async function adminMarkPaid(id) {
         if(!confirm('Mark order ' + id + ' as Paid & Ready for Delivery?')) return;
+        const { data: orderData, error: fetchErr } = await _db.from('orders').select('*').eq('id', id).single();
         const { error } = await _db.from('orders').update({ status: 'Paid & Ready for Delivery' }).eq('id', id);
-        if(!error) { showToast('Order Verified!'); adminFetchOrders(); } else { showToast('Update Failed: ' + error.message); }
+        if(!error) { 
+            showToast('Order Verified!'); adminFetchOrders(); 
+            if(orderData && orderData.user_email) {
+                emailjs.send("service_2tp0z1t", "template_fzu2ulb", {
+                    to_email: orderData.user_email,
+                    subject: "Payment Confirmed - Order #" + id,
+                    message: "Hello!\n\nYour payment of ₹" + orderData.total + " has been confirmed by UrbanCulture.\n\nYour cars are ready for delivery! Please open a ticket in our Discord server and provide your Order ID (" + id + ") to claim them."
+                }).catch(e => console.error("EmailJS:", e));
+            }
+        } else { showToast('Update Failed: ' + error.message); }
     }
 
     async function adminDeleteOrder(id) {
@@ -445,6 +465,8 @@
 
     async function deleteCar(id) { await _db.from('products').delete().eq('id', id); showToast("Car Deleted"); syncProducts(); }
     function filterCars(cat) { currentFilter = cat; document.querySelectorAll('.cat-btn').forEach(btn => { const isMatch = btn.getAttribute('onclick').includes(`'${cat}'`); btn.classList.toggle('bg-black', isMatch); btn.classList.toggle('dark:bg-white', isMatch); btn.classList.toggle('dark:text-black', isMatch); btn.classList.toggle('text-white', isMatch); btn.classList.toggle('bg-gray-100', !isMatch); btn.classList.toggle('dark:bg-zinc-800', !isMatch); btn.classList.toggle('text-black', !isMatch); }); renderGrid(); setTimeout(() => els.grid.scrollIntoView({behavior:'smooth', block:'start'}), 100); }
+    let currentSearch = '';
+    function searchCars(query) { currentSearch = query.toLowerCase(); renderGrid(); }
     let hoverIntervals = new Map();
     function startHoverSlide(imgEl, imgStr) {
         const imgs = imgStr.split(',');
@@ -463,7 +485,7 @@
         imgEl.src = firstImg;
     }
 
-    function renderGrid() { els.grid.innerHTML = ''; const filtered = currentFilter === 'all' ? products : products.filter(p => p.cat === currentFilter); filtered.forEach(p => { const isAdmin = currentUser?.isAdmin && document.getElementById('adminPanel').classList.contains('active'); let badge = p.tag ? `<div class="badge badge-${p.tag}">${p.tag === 'sale' ? 'ON SALE' : (p.tag === 'sold' ? 'SOLD OUT!' : 'NEW!!')}</div>` : ''; const card = document.createElement('div'); card.className = 'product-card group cursor-pointer reveal flex flex-col items-center text-center'; card.innerHTML = `<div class="aspect-[3/4] w-full bg-gray-100 dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden mb-5 relative shadow-sm transition-all">${badge}${isAdmin ? `<div class="absolute top-4 right-4 z-20 flex flex-col gap-2"><button onclick="event.stopPropagation(); deleteCar(${p.id})" class="bg-red-500 text-white w-9 h-9 rounded-full flex items-center justify-center shadow-lg font-bold">×</button><button onclick="event.stopPropagation(); editCar(${p.id})" class="bg-black text-white w-9 h-9 rounded-full flex items-center justify-center shadow-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button></div>` : ''}<img src="${p.img.split(',')[0]}" onmouseenter="startHoverSlide(this, '${p.img}')" onmouseleave="stopHoverSlide(this, '${p.img.split(',')[0]}')" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-[1s] ease-out"><div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div><button onclick="event.stopPropagation(); quickAdd(${p.id})" class="absolute bottom-6 right-6 w-14 h-14 glass-btn text-black rounded-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all shadow-xl"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg></button></div><div class="px-2 w-full"><h3 class="text-[15px] font-black uppercase mb-1 tracking-tight leading-none">${p.title}</h3><div class="flex items-center space-x-3 justify-center"><span class="text-xl font-black tracking-tighter">₹${p.price}</span><span class="text-xs text-gray-400 line-through">₹${Math.round(p.old_price)}</span></div></div>`; card.onclick = () => openModal(p); els.grid.appendChild(card); }); }
+    function renderGrid() { els.grid.innerHTML = ''; const filtered = products.filter(p => { const matchesCat = currentFilter === 'all' || p.cat === currentFilter; const matchesSearch = p.title.toLowerCase().includes(currentSearch); return matchesCat && matchesSearch; }); filtered.forEach(p => { const isAdmin = currentUser?.isAdmin && document.getElementById('adminPanel').classList.contains('active'); let badge = p.tag ? `<div class="badge badge-${p.tag}">${p.tag === 'sale' ? 'ON SALE' : (p.tag === 'sold' ? 'SOLD OUT!' : 'NEW!!')}</div>` : ''; const card = document.createElement('div'); card.className = 'product-card group cursor-pointer reveal flex flex-col items-center text-center'; card.innerHTML = `<div class="aspect-[3/4] w-full bg-gray-100 dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden mb-5 relative shadow-sm transition-all">${badge}${isAdmin ? `<div class="absolute top-4 right-4 z-20 flex flex-col gap-2"><button onclick="event.stopPropagation(); deleteCar(${p.id})" class="bg-red-500 text-white w-9 h-9 rounded-full flex items-center justify-center shadow-lg font-bold">×</button><button onclick="event.stopPropagation(); editCar(${p.id})" class="bg-black text-white w-9 h-9 rounded-full flex items-center justify-center shadow-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button></div>` : ''}<img src="${p.img.split(',')[0]}" onmouseenter="startHoverSlide(this, '${p.img}')" onmouseleave="stopHoverSlide(this, '${p.img.split(',')[0]}')" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-[1s] ease-out"><div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div><button onclick="event.stopPropagation(); quickAdd(${p.id})" class="absolute bottom-6 right-6 w-14 h-14 glass-btn text-black rounded-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all shadow-xl"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg></button></div><div class="px-2 w-full"><h3 class="text-[15px] font-black uppercase mb-1 tracking-tight leading-none">${p.title}</h3><div class="flex items-center space-x-3 justify-center"><span class="text-xl font-black tracking-tighter">₹${p.price}</span><span class="text-xs text-gray-400 line-through">₹${Math.round(p.old_price)}</span></div></div>`; card.onclick = () => openModal(p); els.grid.appendChild(card); }); }
     let slideInterval;
     let currentSlide = 0;
     let modalImgs = [];
@@ -530,7 +552,14 @@
         if (cart.length === 0) return alert('Garage empty!');
         const total = cart.reduce((s, i) => s + i.price, 0);
         const orderId = 'UC-' + Math.random().toString(36).substr(2, 4).toUpperCase() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
-        await _db.from('orders').insert([{ id: orderId, status: "Awaiting Verification", items: cart.map(i=>i.title).join(", "), total: total.toString() }]);
+        const userEmail = currentUser?.email || '';
+        await _db.from('orders').insert([{ id: orderId, status: "Awaiting Verification", items: cart.map(i=>i.title).join(", "), total: total.toString(), user_email: userEmail }]);
+        
+        emailjs.send("service_2tp0z1t", "template_fzu2ulb", {
+            to_email: "tripxhaust@gmail.com",
+            subject: "New Order #" + orderId,
+            message: "A new order was placed for ₹" + total + ".\n\nItems: " + cart.map(i=>i.title).join(", ") + "\nCustomer Email: " + (userEmail || "Guest")
+        }).catch(e => console.error("EmailJS Error:", e));
         const upi = `upi://pay?pa=johanisgreat@yesfam&pn=UrbanCulture&mc=0000&tr=${orderId.replace(/-/g, '')}&am=${total.toFixed(2)}&cu=INR`;
         document.getElementById('qrAmount').innerText = `₹ ${total.toFixed(2)}`;
         document.getElementById('qrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(upi)}`;
