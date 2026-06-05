@@ -46,8 +46,10 @@
         .bottom-sheet { transform: translateY(100%); transition: transform 0.6s var(--apple-ease); }
         .bottom-sheet.active { transform: translateY(0); }
         
-        .cart-drawer { transform: translateX(100%); transition: transform 0.6s var(--apple-ease); }
+        .cart-drawer { transform: translateX(100%); transition: transform 0.5s cubic-bezier(0.43, 0.05, 0.1, 1.1); }
         .cart-drawer.active { transform: translateX(0); }
+        .mobile-menu-drawer { transform: translateX(-100%); transition: transform 0.5s cubic-bezier(0.43, 0.05, 0.1, 1.1); }
+        .mobile-menu-drawer.active { transform: translateX(0); }
         
         .overlay { opacity: 0; pointer-events: none; transition: opacity 0.6s var(--apple-ease); backdrop-filter: blur(12px); background: rgba(0,0,0,0.4); }
         .overlay.active { opacity: 1; pointer-events: auto; }
@@ -124,8 +126,9 @@
                     <svg id="themeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
                 </button>
                 <a href="https://instagram.com/urbanculture.___" target="_blank" class="p-2 apple-btn text-gray-400 hover:text-black dark:hover:text-white hidden sm:block"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5z"></path><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zM17.5 6.5h.01"></path></svg></a>
-                <a href="about.html" class="p-2 apple-btn text-gray-400 hover:text-black dark:hover:text-white block sm:block text-[11px] font-bold uppercase tracking-widest">About</a>
-                <button id="authBtn" onclick="openAuthModal()" class="p-2 apple-btn text-gray-400 hover:text-black dark:hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg></button>
+                <a href="about.html" class="p-2 apple-btn text-gray-400 hover:text-black dark:hover:text-white hidden sm:block text-[11px] font-bold uppercase tracking-widest">About</a>
+                <button id="authBtn" onclick="openAuthModal()" class="p-2 apple-btn text-gray-400 hover:text-black dark:hover:text-white hidden sm:block"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg></button>
+                <button onclick="openMobileMenu()" class="p-2 apple-btn text-gray-400 hover:text-black dark:hover:text-white block sm:hidden"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16m-7 6h7"></path></svg></button>
                 <button onclick="openCart()" class="p-2 relative apple-btn"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg><span id="cartCount" class="absolute top-1 right-1 bg-black dark:bg-white dark:text-black text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span></button>
             </div>
         </header>
@@ -288,6 +291,15 @@
     <div class="p-10 border-t border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50"><div class="flex justify-between items-center mb-10 font-black tracking-tighter text-4xl"><span class="text-xl text-gray-400 uppercase tracking-widest font-bold">Total</span><span>₹ <span id="cartSubtotal">0.00</span></span></div><button id="checkoutBtn" class="w-full py-6 bg-black dark:bg-white dark:text-black text-white font-bold uppercase rounded-3xl shadow-2xl apple-btn">Finalize Purchase</button></div>
 </div>
 
+<div id="mobileMenuDrawer" class="mobile-menu-drawer fixed top-0 left-0 bottom-0 w-full max-w-[300px] bg-white dark:bg-zinc-950 z-[70] flex flex-col shadow-2xl border-r border-gray-100 dark:border-zinc-800">
+    <div class="p-8 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between font-black uppercase tracking-tighter text-2xl">Menu <button onclick="closeMobileMenu()" class="p-2 apple-btn"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button></div>
+    <div class="flex-1 flex flex-col p-8 space-y-6 text-lg font-bold uppercase tracking-widest text-gray-400">
+        <button onclick="closeMobileMenu(); openAuthModal()" class="text-left hover:text-black dark:hover:text-white transition-colors border-b border-gray-100 dark:border-zinc-800 pb-4 flex items-center justify-between"><span id="mobileMenuAuthText">Account</span> <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg></button>
+        <a href="about.html" class="text-left hover:text-black dark:hover:text-white transition-colors border-b border-gray-100 dark:border-zinc-800 pb-4 block flex items-center justify-between">About <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></a>
+        <a href="https://instagram.com/urbanculture.___" target="_blank" class="text-left hover:text-black dark:hover:text-white transition-colors border-b border-gray-100 dark:border-zinc-800 pb-4 block flex items-center justify-between">Instagram <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg></a>
+    </div>
+</div>
+
 <script>
     // Supabase Credentials
     const _SUB_URL = 'https://kpmhmxctsldrjlavcxrf.supabase.co';
@@ -301,7 +313,7 @@
     let cart = []; let currentFilter = 'all'; let selectedProduct = null;
     
     const els = {
-        grid: document.getElementById('productGrid'), modal: document.getElementById('productModal'), cart: document.getElementById('cartDrawer'), overlay: document.getElementById('globalOverlay'), count: document.getElementById('cartCount'),
+        grid: document.getElementById('productGrid'), modal: document.getElementById('productModal'), cart: document.getElementById('cartDrawer'), mobileMenu: document.getElementById('mobileMenuDrawer'), overlay: document.getElementById('globalOverlay'), count: document.getElementById('cartCount'),
         items: document.getElementById('cartItems'), total: document.getElementById('cartSubtotal'), info: document.getElementById('infoModal'), qr: document.getElementById('qrModal'), toastContainer: document.getElementById('toast-container'),
         track: document.getElementById('trackModal'), auth: document.getElementById('authModal')
     };
@@ -310,9 +322,11 @@
     async function syncProducts() { const { data, error } = await _db.from('products').select('*').order('id', { ascending: false }); if(!error) { products = data; if(products.length === 0) { els.grid.innerHTML = '<div class="col-span-full py-20 text-center text-gray-400 font-bold uppercase tracking-widest">Showroom Empty. Add cars from Admin.</div>'; } else { renderGrid(); } } }
     function toggleDarkMode() { document.documentElement.classList.toggle('dark'); localStorage.setItem('uc_theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); }
 
-    function updateAuthUI() { const i = document.getElementById('adminMenuIcon'); if(currentUser) { document.getElementById('authView').classList.add('hidden'); document.getElementById('profileView').classList.remove('hidden'); document.getElementById('userName').innerText = currentUser.name; if(currentUser.isAdmin) i.classList.remove('hidden'); else i.classList.add('hidden'); } else { document.getElementById('authView').classList.remove('hidden'); document.getElementById('profileView').classList.add('hidden'); i.classList.add('hidden'); document.getElementById('adminPanel').classList.remove('active'); } renderGrid(); }
+    function updateAuthUI() { const i = document.getElementById('adminMenuIcon'); if(currentUser) { document.getElementById('authView').classList.add('hidden'); document.getElementById('profileView').classList.remove('hidden'); document.getElementById('userName').innerText = currentUser.name; document.getElementById('mobileMenuAuthText').innerText = currentUser.name; if(currentUser.isAdmin) i.classList.remove('hidden'); else i.classList.add('hidden'); } else { document.getElementById('authView').classList.remove('hidden'); document.getElementById('profileView').classList.add('hidden'); i.classList.add('hidden'); document.getElementById('adminPanel').classList.remove('active'); document.getElementById('mobileMenuAuthText').innerText = "Account"; } renderGrid(); }
     function openAuthModal() { els.auth.classList.add('active'); els.overlay.classList.add('active'); }
     function closeAuthModal() { els.auth.classList.remove('active'); checkOverlay(); }
+    function openMobileMenu() { els.mobileMenu.classList.add('active'); els.overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
+    function closeMobileMenu() { els.mobileMenu.classList.remove('active'); checkOverlay(); document.body.style.overflow = 'auto'; }
     const _ADMIN_EMAILS = ['admin@urbanculture.com'];
     async function checkAdmin(email) { if(_ADMIN_EMAILS.includes(email.toLowerCase())) return true; try { const { data, error } = await _db.from('admins').select('email').eq('email', email).maybeSingle(); if(error) return false; return !!data; } catch(e) { return false; } }
     let authMode = 'login';
@@ -442,7 +456,7 @@
         function closeModal() { clearInterval(slideInterval); els.modal.classList.add('scale-95', 'opacity-0', 'pointer-events-none'); els.modal.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto'); checkOverlay(); document.body.style.overflow = 'auto'; }
     function openCart() { els.cart.classList.add('active'); els.overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
     function closeCart() { els.cart.classList.remove('active'); checkOverlay(); document.body.style.overflow = 'auto'; }
-    function checkOverlay() { if(!els.cart.classList.contains('active') && !els.auth.classList.contains('active') && !els.track.classList.contains('active') && !els.qr.classList.contains('active') && !els.info.classList.contains('active')) els.overlay.classList.remove('active'); }
+    function checkOverlay() { if(!els.cart.classList.contains('active') && !els.auth.classList.contains('active') && !els.track.classList.contains('active') && !els.qr.classList.contains('active') && !els.info.classList.contains('active') && !els.mobileMenu.classList.contains('active')) els.overlay.classList.remove('active'); }
     function quickAdd(id) { addToCart(products.find(p => p.id === id)); }
     function addToCart(p) { if(p.tag === 'sold') return showToast("SOLD OUT!"); cart.push({ ...p, uid: Date.now() + Math.random() }); updateUI(); showToast("Added: " + p.title); closeModal(); }
     function updateUI() { els.items.innerHTML = ''; let t = 0; cart.forEach(item => { t += item.price; const el = document.createElement('div'); el.className = 'flex items-center justify-between space-x-6'; el.innerHTML = `<div class="flex items-center space-x-6"><div class="w-24 h-24 bg-gray-50 dark:bg-zinc-800 rounded-3xl overflow-hidden flex-shrink-0 shadow-inner"><img src="${item.img.split(',')[0]}" class="w-full h-full object-cover"></div><div class="flex-1"><h4 class="text-xs font-black uppercase mb-1 leading-none">${item.title}</h4><p class="text-lg font-black tracking-tighter">₹ ${item.price}</p></div></div><button onclick="removeFromCart(${item.uid})" class="text-gray-200 hover:text-red-500 transition-colors"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>`; els.items.appendChild(el); }); els.count.innerText = cart.length; els.total.innerText = t.toFixed(2); }
@@ -476,7 +490,7 @@
         cart = []; updateUI();
     }
     
-    els.overlay.onclick = () => { closeCart(); closeModal(); closeInfo(); closeQr(); closeTrackModal(); closeAuthModal(); };
+    els.overlay.onclick = () => { closeCart(); closeModal(); closeInfo(); closeQr(); closeTrackModal(); closeAuthModal(); closeMobileMenu(); };
     document.getElementById('modalAddToCart').onclick = () => addToCart(selectedProduct);
     if(localStorage.getItem('uc_theme') === 'dark') toggleDarkMode();
     async function initAuth() {
