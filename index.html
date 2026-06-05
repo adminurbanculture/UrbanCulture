@@ -7,15 +7,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <!-- Anton for Logo (Bold Streetwear), Inter for UI -->
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Pirata One for Gothic Logo, Inter for UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
-                        brand: ['Anton', 'sans-serif'],
+                        brand: ['"Pirata One"', 'cursive'],
                         ui: ['Inter', 'sans-serif']
                     },
                     colors: {
@@ -35,7 +35,7 @@
         .app-container { width: 100%; min-height: 100vh; position: relative; }
         
         /* Brand Typography */
-        .brand-text { font-family: 'Anton', sans-serif; letter-spacing: 0.02em; }
+        .brand-text { font-family: 'Pirata One', cursive; letter-spacing: 0.05em; font-size: 1.4em; }
         
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .reveal { animation: fadeInUp 1s var(--apple-ease) forwards; }
@@ -134,7 +134,7 @@
                 </button>
                 <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.href='index.html'">
                     <img src="logo.jpeg" class="w-8 h-8 rounded-lg shadow-sm" alt="Logo">
-                    <h1 class="brand-text text-xl md:text-2xl uppercase tracking-wider">UrbanCulture</h1>
+                    <h1 class="brand-text">Urban Culture</h1>
                 </div>
             </div>
             
@@ -216,7 +216,7 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16 text-center md:text-left">
-            <div class="space-y-5"><h4 class="brand-text text-lg font-black uppercase tracking-widest">UrbanCulture</h4><p class="text-gray-400 text-[13px] leading-relaxed">The premier destination for elite car trading in CPM1.</p></div>
+            <div class="space-y-5"><h4 class="brand-text">Urban Culture</h4><p class="text-gray-400 text-[13px] leading-relaxed">The premier destination for elite car trading in CPM1.</p></div>
             <div class="space-y-5"><h4 class="text-[10px] font-black uppercase text-gray-400 tracking-widest">Services</h4><ul class="space-y-2 text-[13px]"><li><button onclick="openTrackModal()" class="hover:underline">Track My Order</button></li><li><button onclick="openInfo('delivery')" class="hover:underline">Delivery Info</button></li><li><button onclick="openInfo('faq')" class="hover:underline">FAQs</button></li></ul></div>
             <div class="space-y-5"><h4 class="text-[10px] font-black uppercase text-gray-400 tracking-widest">Legal</h4><ul class="space-y-2 text-[13px]"><li><button onclick="openInfo('privacy')" class="hover:underline">Privacy Policy</button></li><li><button onclick="openInfo('terms')" class="hover:underline">Terms of Service</button></li><li><button onclick="openInfo('refund')" class="hover:underline">Refund Policy</button></li></ul></div>
             <div class="space-y-5"><h4 class="text-[10px] font-black uppercase text-gray-400 tracking-widest">Accepted</h4><div class="flex gap-2 justify-center md:justify-start"><div class="px-3 py-1.5 border border-gray-200 dark:border-zinc-800 rounded-lg text-[10px] font-black uppercase">UPI</div></div></div>
