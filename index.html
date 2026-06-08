@@ -114,6 +114,13 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+
+        /* View Transitions */
+        ::view-transition-old(active-car),
+        ::view-transition-new(active-car) {
+            animation-duration: 0.6s;
+            animation-timing-function: var(--apple-spring);
+        }
     </style>
 </head>
 <body class="light">
@@ -485,43 +492,66 @@
         imgEl.src = firstImg;
     }
 
-    function renderGrid() { els.grid.innerHTML = ''; const filtered = products.filter(p => { const matchesCat = currentFilter === 'all' || p.cat === currentFilter; const matchesSearch = p.title.toLowerCase().includes(currentSearch); return matchesCat && matchesSearch; }); if (filtered.length === 0) { els.grid.innerHTML = '<div class="col-span-full py-20 text-center text-gray-400 font-bold uppercase tracking-widest">' + (products.length === 0 ? 'Showroom Empty. Add cars from Admin.' : 'No cars found.') + '</div>'; return; } filtered.forEach(p => { const isAdmin = currentUser?.isAdmin && document.getElementById('adminPanel').classList.contains('active'); let badge = p.tag ? `<div class="badge badge-${p.tag}">${p.tag === 'sale' ? 'ON SALE' : (p.tag === 'sold' ? 'SOLD OUT!' : 'NEW!!')}</div>` : ''; const card = document.createElement('div'); card.className = 'product-card group cursor-pointer reveal flex flex-col items-center text-center'; card.innerHTML = `<div class="aspect-[3/4] w-full bg-gray-100 dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden mb-5 relative shadow-sm transition-all">${badge}${isAdmin ? `<div class="absolute top-4 right-4 z-20 flex flex-col gap-2"><button onclick="event.stopPropagation(); deleteCar(${p.id})" class="bg-red-500 text-white w-9 h-9 rounded-full flex items-center justify-center shadow-lg font-bold">×</button><button onclick="event.stopPropagation(); editCar(${p.id})" class="bg-black text-white w-9 h-9 rounded-full flex items-center justify-center shadow-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button></div>` : ''}<img src="${p.img.split(',')[0]}" onmouseenter="startHoverSlide(this, '${p.img}')" onmouseleave="stopHoverSlide(this, '${p.img.split(',')[0]}')" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-[1s] ease-out"><div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div><button onclick="event.stopPropagation(); quickAdd(${p.id})" class="absolute bottom-6 right-6 w-14 h-14 glass-btn text-black rounded-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all shadow-xl"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg></button></div><div class="px-2 w-full"><h3 class="text-[15px] font-black uppercase mb-1 tracking-tight leading-none">${p.title}</h3><div class="flex items-center space-x-3 justify-center"><span class="text-xl font-black tracking-tighter">₹${p.price}</span><span class="text-xs text-gray-400 line-through">₹${Math.round(p.old_price)}</span></div></div>`; card.onclick = () => openModal(p); els.grid.appendChild(card); }); }
+    function renderGrid() { els.grid.innerHTML = ''; const filtered = products.filter(p => { const matchesCat = currentFilter === 'all' || p.cat === currentFilter; const matchesSearch = p.title.toLowerCase().includes(currentSearch); return matchesCat && matchesSearch; }); if (filtered.length === 0) { els.grid.innerHTML = '<div class="col-span-full py-20 text-center text-gray-400 font-bold uppercase tracking-widest">' + (products.length === 0 ? 'Showroom Empty. Add cars from Admin.' : 'No cars found.') + '</div>'; return; } filtered.forEach(p => { const isAdmin = currentUser?.isAdmin && document.getElementById('adminPanel').classList.contains('active'); let badge = p.tag ? `<div class="badge badge-${p.tag}">${p.tag === 'sale' ? 'ON SALE' : (p.tag === 'sold' ? 'SOLD OUT!' : 'NEW!!')}</div>` : ''; const card = document.createElement('div'); card.className = 'product-card group cursor-pointer reveal flex flex-col items-center text-center'; card.innerHTML = `<div class="aspect-[3/4] w-full bg-gray-100 dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden mb-5 relative shadow-sm transition-all">${badge}${isAdmin ? `<div class="absolute top-4 right-4 z-20 flex flex-col gap-2"><button onclick="event.stopPropagation(); deleteCar(${p.id})" class="bg-red-500 text-white w-9 h-9 rounded-full flex items-center justify-center shadow-lg font-bold">×</button><button onclick="event.stopPropagation(); editCar(${p.id})" class="bg-black text-white w-9 h-9 rounded-full flex items-center justify-center shadow-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button></div>` : ''}<img id="grid-img-${p.id}" src="${p.img.split(',')[0]}" onmouseenter="startHoverSlide(this, '${p.img}')" onmouseleave="stopHoverSlide(this, '${p.img.split(',')[0]}')" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-[1s] ease-out"><div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div><button onclick="event.stopPropagation(); quickAdd(${p.id})" class="absolute bottom-6 right-6 w-14 h-14 glass-btn text-black rounded-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all shadow-xl"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg></button></div><div class="px-2 w-full"><h3 class="text-[15px] font-black uppercase mb-1 tracking-tight leading-none">${p.title}</h3><div class="flex items-center space-x-3 justify-center"><span class="text-xl font-black tracking-tighter">₹${p.price}</span><span class="text-xs text-gray-400 line-through">₹${Math.round(p.old_price)}</span></div></div>`; card.onclick = () => openModal(p, `grid-img-${p.id}`); els.grid.appendChild(card); }); }
     let slideInterval;
     let currentSlide = 0;
     let modalImgs = [];
 
-    function openModal(p) {
+    function openModal(p, imgId) {
         selectedProduct = p; modalImgs = p.img.split(','); currentSlide = 0;
-        document.getElementById('modalImg').src = modalImgs[0];
-        document.getElementById('modalTitle').innerText = p.title;
-        document.getElementById('modalPrice').innerText = `₹${p.price}`;
+        
+        const openUI = () => {
+            document.getElementById('modalImg').src = modalImgs[0];
+            document.getElementById('modalTitle').innerText = p.title;
+            document.getElementById('modalPrice').innerText = `₹${p.price}`;
 
-        const featList = document.getElementById('modalFeatures');
-        featList.innerHTML = '';
-        if (p.features) {
-            p.features.split(',').forEach(f => {
-                const text = f.trim();
-                if (text) featList.innerHTML += `<li class="flex items-center space-x-3"><svg class="w-5 h-5 text-black dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg><span class="text-black dark:text-gray-300">${text}</span></li>`;
-            });
-        } else {
-            featList.innerHTML = `<li class="text-gray-400 italic">No features listed.</li>`;
+            const featList = document.getElementById('modalFeatures');
+            featList.innerHTML = '';
+            if (p.features) {
+                p.features.split(',').forEach(f => {
+                    const text = f.trim();
+                    if (text) featList.innerHTML += `<li class="flex items-center space-x-3"><svg class="w-5 h-5 text-black dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg><span class="text-black dark:text-gray-300">${text}</span></li>`;
+                });
+            } else {
+                featList.innerHTML = `<li class="text-gray-400 italic">No features listed.</li>`;
+            }
+
+            clearInterval(slideInterval);
+
+            const prevBtn = document.getElementById('modalPrev');
+            const nextBtn = document.getElementById('modalNext');
+
+            if(modalImgs.length > 1) {
+                prevBtn.classList.remove('hidden');
+                nextBtn.classList.remove('hidden');
+                slideInterval = setInterval(() => navSlide(1), 2500);
+            } else {
+                prevBtn.classList.add('hidden');
+                nextBtn.classList.add('hidden');
+            }
+
+            els.modal.classList.remove('scale-95', 'opacity-0', 'pointer-events-none'); els.modal.classList.add('scale-100', 'opacity-100', 'pointer-events-auto'); els.overlay.classList.add('active'); document.body.style.overflow = 'hidden';
+        };
+
+        if (imgId && document.startViewTransition) {
+            const gridImg = document.getElementById(imgId);
+            const modalImg = document.getElementById('modalImg');
+            
+            if (gridImg && modalImg) {
+                gridImg.style.viewTransitionName = 'active-car';
+                modalImg.style.viewTransitionName = 'active-car';
+                
+                const transition = document.startViewTransition(() => {
+                    openUI();
+                });
+                
+                transition.finished.finally(() => {
+                    gridImg.style.viewTransitionName = '';
+                });
+                return;
+            }
         }
-
-        clearInterval(slideInterval);
-
-        const prevBtn = document.getElementById('modalPrev');
-        const nextBtn = document.getElementById('modalNext');
-
-        if(modalImgs.length > 1) {
-            prevBtn.classList.remove('hidden');
-            nextBtn.classList.remove('hidden');
-            slideInterval = setInterval(() => navSlide(1), 2500);
-        } else {
-            prevBtn.classList.add('hidden');
-            nextBtn.classList.add('hidden');
-        }
-
-        els.modal.classList.remove('scale-95', 'opacity-0', 'pointer-events-none'); els.modal.classList.add('scale-100', 'opacity-100', 'pointer-events-auto'); els.overlay.classList.add('active'); document.body.style.overflow = 'hidden';
+        openUI();
     }
 
         function navSlide(dir) {
@@ -532,7 +562,32 @@
         clearInterval(slideInterval);
         slideInterval = setInterval(() => navSlide(1), 2500);
         }
-        function closeModal() { clearInterval(slideInterval); els.modal.classList.add('scale-95', 'opacity-0', 'pointer-events-none'); els.modal.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto'); checkOverlay(); document.body.style.overflow = 'auto'; }
+        
+        function closeModal() { 
+            const closeUI = () => {
+                clearInterval(slideInterval); els.modal.classList.add('scale-95', 'opacity-0', 'pointer-events-none'); els.modal.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto'); checkOverlay(); document.body.style.overflow = 'auto';
+            };
+
+            if (selectedProduct && document.startViewTransition) {
+                const gridImg = document.getElementById('grid-img-' + selectedProduct.id);
+                const modalImg = document.getElementById('modalImg');
+                if (gridImg && modalImg) {
+                    gridImg.style.viewTransitionName = 'active-car';
+                    modalImg.style.viewTransitionName = 'active-car';
+                    
+                    const transition = document.startViewTransition(() => {
+                        closeUI();
+                    });
+                    
+                    transition.finished.finally(() => {
+                        gridImg.style.viewTransitionName = '';
+                        modalImg.style.viewTransitionName = '';
+                    });
+                    return;
+                }
+            }
+            closeUI();
+        }
     function openCart() { els.cart.classList.add('active'); els.overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
     function closeCart() { els.cart.classList.remove('active'); checkOverlay(); document.body.style.overflow = 'auto'; }
     function checkOverlay() { if(!els.cart.classList.contains('active') && !els.auth.classList.contains('active') && !els.track.classList.contains('active') && !els.qr.classList.contains('active') && !els.info.classList.contains('active') && !els.mobileMenu.classList.contains('active')) els.overlay.classList.remove('active'); }
