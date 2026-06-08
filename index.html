@@ -540,12 +540,12 @@
 
                     const state = Flip.getState([gridImg]);
 
-                    els.modal.classList.remove('scale-95', 'pointer-events-none', 'transition-all', 'duration-500');
-                    els.modal.classList.add('scale-100', 'pointer-events-auto');
+                    els.modal.classList.remove('scale-95', 'opacity-0', 'pointer-events-none', 'transition-all', 'duration-500');
+                    els.modal.classList.add('scale-100', 'opacity-100', 'pointer-events-auto');
                     els.overlay.classList.add('active');
                     document.body.style.overflow = 'hidden';
                     
-                    gsap.set(els.modal, { backgroundColor: 'transparent', opacity: 1 });
+                    gsap.set(els.modal, { backgroundColor: 'transparent' });
                     gsap.set(modalText, { opacity: 0, x: 20 });
                     gsap.set(modalBox.querySelector('button'), { opacity: 0 });
 
@@ -555,7 +555,6 @@
                         targets: [modalImg],
                         duration: 0.7,
                         ease: "power4.inOut",
-                        scale: true,
                         absolute: true
                     });
                     
@@ -640,7 +639,6 @@
                             targets: [gridImg],
                             duration: 0.6,
                             ease: "power4.inOut",
-                            scale: true,
                             absolute: true
                         });
                         selectedProduct = null;
