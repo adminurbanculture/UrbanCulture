@@ -115,9 +115,17 @@
             -webkit-text-fill-color: transparent;
         }
     </style>
-    <!-- GSAP & Flip Plugin -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Flip.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&display=swap');
+        
+        ::view-transition-old(hero-img),
+        ::view-transition-new(hero-img) {
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        :root {
 </head>
 <body class="light">
 
@@ -526,59 +534,23 @@
             nextBtn.classList.add('hidden');
         }
 
-        if (imgId && typeof Flip !== 'undefined') {
-            try {
-                gsap.registerPlugin(Flip);
-                const gridImg = document.getElementById(imgId);
-                const modalImg = document.getElementById('modalImgContainer');
-                const modalText = document.getElementById('modalTextContainer');
-                const modalBox = els.modal;
+        if (imgId && document.startViewTransition) {
+            const gridImg = document.getElementById(imgId);
+            const modalImg = document.getElementById('modalImgContainer');
+            
+            if (gridImg && modalImg) {
+                gridImg.style.viewTransitionName = 'hero-img';
+                modalImg.style.viewTransitionName = 'hero-img';
                 
-                if (gridImg && modalImg && modalText && modalBox) {
-                    gridImg.dataset.flipId = `img-${p.id}`;
-                    modalImg.dataset.flipId = `img-${p.id}`;
-
-                    const state = Flip.getState([gridImg]);
-
-                    els.modal.classList.remove('scale-95', 'opacity-0', 'pointer-events-none', 'transition-all', 'duration-500');
+                document.startViewTransition(() => {
+                    gridImg.style.viewTransitionName = '';
+                    
+                    els.modal.classList.remove('scale-95', 'opacity-0', 'pointer-events-none');
                     els.modal.classList.add('scale-100', 'opacity-100', 'pointer-events-auto');
                     els.overlay.classList.add('active');
                     document.body.style.overflow = 'hidden';
-                    
-                    gsap.set(els.modal, { backgroundColor: 'transparent' });
-                    gsap.set(modalText, { opacity: 0, x: 20 });
-                    gsap.set(modalBox.querySelector('button'), { opacity: 0 });
-
-                    gridImg.style.visibility = 'hidden';
-
-                    Flip.from(state, {
-                        targets: [modalImg],
-                        duration: 0.7,
-                        ease: "power4.inOut",
-                        absolute: true
-                    });
-                    
-                    gsap.to(els.modal, {
-                        backgroundColor: document.body.classList.contains('dark') ? '#000000' : '#ffffff',
-                        duration: 0.5,
-                        ease: "power2.inOut"
-                    });
-                    
-                    gsap.to([modalText, modalBox.querySelector('button')], {
-                        opacity: 1,
-                        x: 0,
-                        duration: 0.5,
-                        delay: 0.3,
-                        ease: "power3.out",
-                        onComplete: () => {
-                            gsap.set([modalText, modalBox.querySelector('button'), els.modal], {clearProps: "all"});
-                        }
-                    });
-
-                    return;
-                }
-            } catch (e) {
-                console.error("GSAP Flip Error (open):", e);
+                });
+                return;
             }
         }
         
@@ -601,51 +573,29 @@
             if (!els.modal.classList.contains('scale-100')) return;
             clearInterval(slideInterval);
             
-            if (selectedProduct && typeof Flip !== 'undefined') {
-                try {
-                    gsap.registerPlugin(Flip);
-                    const gridImg = document.getElementById('grid-img-container-' + selectedProduct.id);
-                    const modalImg = document.getElementById('modalImgContainer');
-                    const modalText = document.getElementById('modalTextContainer');
-                    const modalBox = els.modal;
+            if (selectedProduct && document.startViewTransition) {
+                const gridImg = document.getElementById('grid-img-container-' + selectedProduct.id);
+                const modalImg = document.getElementById('modalImgContainer');
+                
+                if (gridImg && modalImg) {
+                    modalImg.style.viewTransitionName = 'hero-img';
+                    gridImg.style.viewTransitionName = 'hero-img';
                     
-                    if (gridImg && modalImg && modalText && modalBox) {
-                        gridImg.dataset.flipId = `img-${selectedProduct.id}`;
-                        modalImg.dataset.flipId = `img-${selectedProduct.id}`;
-                        
-                        const state = Flip.getState([modalImg]);
-                        
-                        gridImg.style.visibility = 'visible';
-                        modalImg.style.visibility = 'hidden';
-                        
+                    const transition = document.startViewTransition(() => {
+                        modalImg.style.viewTransitionName = '';
+                        els.modal.classList.add('scale-95', 'opacity-0', 'pointer-events-none');
+                        els.modal.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto');
                         els.overlay.classList.remove('active');
-                        document.body.style.overflow = 'auto';
                         checkOverlay();
-                        
-                        gsap.to(modalText, { opacity: 0, duration: 0.2 });
-                        gsap.to(modalBox.querySelector('button'), { opacity: 0, duration: 0.2 });
-                        gsap.to(els.modal, { 
-                            backgroundColor: 'transparent', 
-                            duration: 0.4,
-                            onComplete: () => {
-                                els.modal.classList.add('scale-95', 'opacity-0', 'pointer-events-none');
-                                els.modal.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto');
-                                gsap.set([modalText, modalBox.querySelector('button'), els.modal, modalImg], {clearProps: "all"});
-                                els.modal.classList.add('transition-all', 'duration-500');
-                            }
-                        });
-                        
-                        Flip.from(state, {
-                            targets: [gridImg],
-                            duration: 0.6,
-                            ease: "power4.inOut",
-                            absolute: true
-                        });
+                        document.body.style.overflow = 'auto';
+                    });
+                    
+                    transition.finished.finally(() => {
+                        gridImg.style.viewTransitionName = '';
                         selectedProduct = null;
-                        return;
-                    }
-                } catch (e) {
-                    console.error("GSAP Flip Error (close):", e);
+                    });
+                    
+                    return;
                 }
             }
             
@@ -655,11 +605,20 @@
             document.body.style.overflow = 'auto';
             selectedProduct = null;
         }
+        
+        function closeUIInstant() {
+            els.modal.classList.add('scale-95', 'opacity-0', 'pointer-events-none'); 
+            els.modal.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto'); 
+            els.overlay.classList.remove('active');
+            checkOverlay();
+            document.body.style.overflow = 'auto';
+            selectedProduct = null;
+        }
     function openCart() { els.cart.classList.add('active'); els.overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
     function closeCart() { els.cart.classList.remove('active'); checkOverlay(); document.body.style.overflow = 'auto'; }
     function checkOverlay() { if(!els.cart.classList.contains('active') && !els.auth.classList.contains('active') && !els.track.classList.contains('active') && !els.qr.classList.contains('active') && !els.info.classList.contains('active') && !els.mobileMenu.classList.contains('active')) els.overlay.classList.remove('active'); }
     function quickAdd(id) { addToCart(products.find(p => p.id === id)); }
-    function addToCart(p) { if(p.tag === 'sold') return showToast("SOLD OUT!"); cart.push({ ...p, uid: Date.now() + Math.random() }); updateUI(); showToast("Added: " + p.title); closeModal(); openCart(); }
+    function addToCart(p) { if(p.tag === 'sold') return showToast("SOLD OUT!"); cart.push({ ...p, uid: Date.now() + Math.random() }); updateUI(); showToast("Added: " + p.title); closeUIInstant(); openCart(); }
     function updateUI() { els.items.innerHTML = ''; let t = 0; cart.forEach(item => { t += item.price; const el = document.createElement('div'); el.className = 'flex items-center justify-between space-x-6'; el.innerHTML = `<div class="flex items-center space-x-6"><div class="w-24 h-24 bg-gray-50 dark:bg-zinc-800 rounded-3xl overflow-hidden flex-shrink-0 shadow-inner"><img src="${item.img.split(',')[0]}" class="w-full h-full object-cover"></div><div class="flex-1"><h4 class="text-xs font-black uppercase mb-1 leading-none">${item.title}</h4><p class="text-lg font-black tracking-tighter">₹ ${item.price}</p></div></div><button onclick="removeFromCart(${item.uid})" class="text-gray-200 hover:text-red-500 transition-colors"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>`; els.items.appendChild(el); }); els.count.innerText = cart.length; els.total.innerText = t.toFixed(2); }
     function removeFromCart(uid) { cart = cart.filter(x => x.uid !== uid); updateUI(); }
     function openTrackModal() { els.track.classList.add('active'); els.overlay.classList.add('active'); document.getElementById('trackResult').classList.add('hidden'); }
