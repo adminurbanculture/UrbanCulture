@@ -310,7 +310,7 @@
         <button id="modalPrev" onclick="navSlide(-1)" class="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/30 backdrop-blur-md text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hidden"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
         <button id="modalNext" onclick="navSlide(1)" class="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/30 backdrop-blur-md text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hidden"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
     </div>
-    <div class="w-full lg:w-1/2 h-[50vh] lg:h-full overflow-y-auto p-8 lg:p-16 flex flex-col justify-center bg-white dark:bg-zinc-950 relative z-10">
+    <div id="modalTextContainer" class="w-full lg:w-1/2 h-[50vh] lg:h-full overflow-y-auto p-8 lg:p-16 flex flex-col justify-center bg-white dark:bg-zinc-950 relative z-10">
         <h3 id="modalTitle" class="text-4xl lg:text-7xl font-brand uppercase tracking-tighter mb-4 leading-none text-black dark:text-white"></h3>
         <p id="modalPrice" class="text-3xl font-black mb-10 text-gray-400">₹ 0</p>
         <div class="mb-10">
@@ -530,32 +530,52 @@
             try {
                 gsap.registerPlugin(Flip);
                 const gridImg = document.getElementById(imgId);
-                const gridCard = document.getElementById(`grid-card-${p.id}`);
                 const modalImg = document.getElementById('modalImgContainer');
+                const modalText = document.getElementById('modalTextContainer');
                 const modalBox = els.modal;
                 
-                if (gridImg && modalImg && gridCard && modalBox) {
-                    gridCard.dataset.flipId = `card-${p.id}`;
-                    modalBox.dataset.flipId = `card-${p.id}`;
+                if (gridImg && modalImg && modalText && modalBox) {
                     gridImg.dataset.flipId = `img-${p.id}`;
                     modalImg.dataset.flipId = `img-${p.id}`;
 
-                    const state = Flip.getState([gridCard, gridImg]);
+                    const state = Flip.getState([gridImg]);
 
-                    els.modal.classList.remove('scale-95', 'opacity-0', 'pointer-events-none', 'transition-all', 'duration-500');
-                    els.modal.classList.add('scale-100', 'opacity-100', 'pointer-events-auto');
+                    els.modal.classList.remove('scale-95', 'pointer-events-none', 'transition-all', 'duration-500');
+                    els.modal.classList.add('scale-100', 'pointer-events-auto');
                     els.overlay.classList.add('active');
                     document.body.style.overflow = 'hidden';
+                    
+                    gsap.set(els.modal, { backgroundColor: 'transparent', opacity: 1 });
+                    gsap.set(modalText, { opacity: 0, x: 20 });
+                    gsap.set(modalBox.querySelector('button'), { opacity: 0 });
 
-                    gridCard.style.visibility = 'hidden';
+                    gridImg.style.visibility = 'hidden';
 
                     Flip.from(state, {
-                        targets: [modalBox, modalImg],
-                        duration: 0.6,
-                        ease: "power3.inOut",
+                        targets: [modalImg],
+                        duration: 0.7,
+                        ease: "power4.inOut",
                         scale: true,
                         absolute: true
                     });
+                    
+                    gsap.to(els.modal, {
+                        backgroundColor: document.body.classList.contains('dark') ? '#000000' : '#ffffff',
+                        duration: 0.5,
+                        ease: "power2.inOut"
+                    });
+                    
+                    gsap.to([modalText, modalBox.querySelector('button')], {
+                        opacity: 1,
+                        x: 0,
+                        duration: 0.5,
+                        delay: 0.3,
+                        ease: "power3.out",
+                        onComplete: () => {
+                            gsap.set([modalText, modalBox.querySelector('button'), els.modal], {clearProps: "all"});
+                        }
+                    });
+
                     return;
                 }
             } catch (e) {
@@ -586,34 +606,42 @@
                 try {
                     gsap.registerPlugin(Flip);
                     const gridImg = document.getElementById('grid-img-container-' + selectedProduct.id);
-                    const gridCard = document.getElementById('grid-card-' + selectedProduct.id);
                     const modalImg = document.getElementById('modalImgContainer');
+                    const modalText = document.getElementById('modalTextContainer');
                     const modalBox = els.modal;
                     
-                    if (gridImg && modalImg && gridCard && modalBox) {
-                        gridCard.dataset.flipId = `card-${selectedProduct.id}`;
-                        modalBox.dataset.flipId = `card-${selectedProduct.id}`;
+                    if (gridImg && modalImg && modalText && modalBox) {
                         gridImg.dataset.flipId = `img-${selectedProduct.id}`;
                         modalImg.dataset.flipId = `img-${selectedProduct.id}`;
                         
-                        const state = Flip.getState([modalBox, modalImg]);
+                        const state = Flip.getState([modalImg]);
                         
-                        els.modal.classList.add('scale-95', 'opacity-0', 'pointer-events-none');
-                        els.modal.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto', 'transition-all', 'duration-500');
+                        gridImg.style.visibility = 'visible';
+                        modalImg.style.visibility = 'hidden';
+                        
                         els.overlay.classList.remove('active');
-                        gridCard.style.visibility = 'visible';
-                        checkOverlay();
                         document.body.style.overflow = 'auto';
+                        checkOverlay();
                         
-                        Flip.from(state, {
-                            targets: [gridCard, gridImg],
-                            duration: 0.5,
-                            ease: "power3.inOut",
-                            scale: true,
-                            absolute: true,
+                        gsap.to(modalText, { opacity: 0, duration: 0.2 });
+                        gsap.to(modalBox.querySelector('button'), { opacity: 0, duration: 0.2 });
+                        gsap.to(els.modal, { 
+                            backgroundColor: 'transparent', 
+                            duration: 0.4,
                             onComplete: () => {
+                                els.modal.classList.add('scale-95', 'opacity-0', 'pointer-events-none');
+                                els.modal.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto');
+                                gsap.set([modalText, modalBox.querySelector('button'), els.modal, modalImg], {clearProps: "all"});
                                 els.modal.classList.add('transition-all', 'duration-500');
                             }
+                        });
+                        
+                        Flip.from(state, {
+                            targets: [gridImg],
+                            duration: 0.6,
+                            ease: "power4.inOut",
+                            scale: true,
+                            absolute: true
                         });
                         selectedProduct = null;
                         return;
@@ -633,7 +661,7 @@
     function closeCart() { els.cart.classList.remove('active'); checkOverlay(); document.body.style.overflow = 'auto'; }
     function checkOverlay() { if(!els.cart.classList.contains('active') && !els.auth.classList.contains('active') && !els.track.classList.contains('active') && !els.qr.classList.contains('active') && !els.info.classList.contains('active') && !els.mobileMenu.classList.contains('active')) els.overlay.classList.remove('active'); }
     function quickAdd(id) { addToCart(products.find(p => p.id === id)); }
-    function addToCart(p) { if(p.tag === 'sold') return showToast("SOLD OUT!"); cart.push({ ...p, uid: Date.now() + Math.random() }); updateUI(); showToast("Added: " + p.title); closeModal(); }
+    function addToCart(p) { if(p.tag === 'sold') return showToast("SOLD OUT!"); cart.push({ ...p, uid: Date.now() + Math.random() }); updateUI(); showToast("Added: " + p.title); closeModal(); openCart(); }
     function updateUI() { els.items.innerHTML = ''; let t = 0; cart.forEach(item => { t += item.price; const el = document.createElement('div'); el.className = 'flex items-center justify-between space-x-6'; el.innerHTML = `<div class="flex items-center space-x-6"><div class="w-24 h-24 bg-gray-50 dark:bg-zinc-800 rounded-3xl overflow-hidden flex-shrink-0 shadow-inner"><img src="${item.img.split(',')[0]}" class="w-full h-full object-cover"></div><div class="flex-1"><h4 class="text-xs font-black uppercase mb-1 leading-none">${item.title}</h4><p class="text-lg font-black tracking-tighter">₹ ${item.price}</p></div></div><button onclick="removeFromCart(${item.uid})" class="text-gray-200 hover:text-red-500 transition-colors"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>`; els.items.appendChild(el); }); els.count.innerText = cart.length; els.total.innerText = t.toFixed(2); }
     function removeFromCart(uid) { cart = cart.filter(x => x.uid !== uid); updateUI(); }
     function openTrackModal() { els.track.classList.add('active'); els.overlay.classList.add('active'); document.getElementById('trackResult').classList.add('hidden'); }
