@@ -539,14 +539,19 @@
             
             if (gridImg && modalImg) {
                 gridImg.style.viewTransitionName = 'active-car';
-                modalImg.style.viewTransitionName = 'active-car';
+                modalImg.style.viewTransitionName = '';
                 
                 const transition = document.startViewTransition(() => {
+                    gridImg.style.viewTransitionName = '';
+                    modalImg.style.viewTransitionName = 'active-car';
+                    els.modal.classList.remove('transition-all', 'duration-500');
                     openUI();
                 });
                 
                 transition.finished.finally(() => {
                     gridImg.style.viewTransitionName = '';
+                    modalImg.style.viewTransitionName = '';
+                    els.modal.classList.add('transition-all', 'duration-500');
                 });
                 return;
             }
@@ -572,16 +577,20 @@
                 const gridImg = document.getElementById('grid-img-' + selectedProduct.id);
                 const modalImg = document.getElementById('modalImg');
                 if (gridImg && modalImg) {
-                    gridImg.style.viewTransitionName = 'active-car';
                     modalImg.style.viewTransitionName = 'active-car';
+                    gridImg.style.viewTransitionName = '';
                     
                     const transition = document.startViewTransition(() => {
+                        modalImg.style.viewTransitionName = '';
+                        gridImg.style.viewTransitionName = 'active-car';
+                        els.modal.classList.remove('transition-all', 'duration-500');
                         closeUI();
                     });
                     
                     transition.finished.finally(() => {
                         gridImg.style.viewTransitionName = '';
                         modalImg.style.viewTransitionName = '';
+                        els.modal.classList.add('transition-all', 'duration-500');
                     });
                     return;
                 }
