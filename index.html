@@ -116,10 +116,19 @@
         }
 
         /* View Transitions */
-        ::view-transition-old(active-car),
-        ::view-transition-new(active-car) {
+        ::view-transition-group(active-car),
+        ::view-transition-group(active-modal) {
             animation-duration: 0.6s;
             animation-timing-function: var(--apple-spring);
+        }
+        
+        ::view-transition-old(active-modal),
+        ::view-transition-new(active-modal),
+        ::view-transition-old(active-car),
+        ::view-transition-new(active-car) {
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
         }
     </style>
 </head>
@@ -492,7 +501,7 @@
         imgEl.src = firstImg;
     }
 
-    function renderGrid() { els.grid.innerHTML = ''; const filtered = products.filter(p => { const matchesCat = currentFilter === 'all' || p.cat === currentFilter; const matchesSearch = p.title.toLowerCase().includes(currentSearch); return matchesCat && matchesSearch; }); if (filtered.length === 0) { els.grid.innerHTML = '<div class="col-span-full py-20 text-center text-gray-400 font-bold uppercase tracking-widest">' + (products.length === 0 ? 'Showroom Empty. Add cars from Admin.' : 'No cars found.') + '</div>'; return; } filtered.forEach(p => { const isAdmin = currentUser?.isAdmin && document.getElementById('adminPanel').classList.contains('active'); let badge = p.tag ? `<div class="badge badge-${p.tag}">${p.tag === 'sale' ? 'ON SALE' : (p.tag === 'sold' ? 'SOLD OUT!' : 'NEW!!')}</div>` : ''; const card = document.createElement('div'); card.className = 'product-card group cursor-pointer reveal flex flex-col items-center text-center'; card.innerHTML = `<div id="grid-img-container-${p.id}" class="aspect-[3/4] w-full bg-gray-100 dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden mb-5 relative shadow-sm transition-all">${badge}${isAdmin ? `<div class="absolute top-4 right-4 z-20 flex flex-col gap-2"><button onclick="event.stopPropagation(); deleteCar(${p.id})" class="bg-red-500 text-white w-9 h-9 rounded-full flex items-center justify-center shadow-lg font-bold">×</button><button onclick="event.stopPropagation(); editCar(${p.id})" class="bg-black text-white w-9 h-9 rounded-full flex items-center justify-center shadow-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button></div>` : ''}<img src="${p.img.split(',')[0]}" onmouseenter="startHoverSlide(this, '${p.img}')" onmouseleave="stopHoverSlide(this, '${p.img.split(',')[0]}')" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-[1s] ease-out"><div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div><button onclick="event.stopPropagation(); quickAdd(${p.id})" class="absolute bottom-6 right-6 w-14 h-14 glass-btn text-black rounded-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all shadow-xl"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg></button></div><div class="px-2 w-full"><h3 class="text-[15px] font-black uppercase mb-1 tracking-tight leading-none">${p.title}</h3><div class="flex items-center space-x-3 justify-center"><span class="text-xl font-black tracking-tighter">₹${p.price}</span><span class="text-xs text-gray-400 line-through">₹${Math.round(p.old_price)}</span></div></div>`; card.onclick = () => openModal(p, `grid-img-container-${p.id}`); els.grid.appendChild(card); }); }
+    function renderGrid() { els.grid.innerHTML = ''; const filtered = products.filter(p => { const matchesCat = currentFilter === 'all' || p.cat === currentFilter; const matchesSearch = p.title.toLowerCase().includes(currentSearch); return matchesCat && matchesSearch; }); if (filtered.length === 0) { els.grid.innerHTML = '<div class="col-span-full py-20 text-center text-gray-400 font-bold uppercase tracking-widest">' + (products.length === 0 ? 'Showroom Empty. Add cars from Admin.' : 'No cars found.') + '</div>'; return; } filtered.forEach(p => { const isAdmin = currentUser?.isAdmin && document.getElementById('adminPanel').classList.contains('active'); let badge = p.tag ? `<div class="badge badge-${p.tag}">${p.tag === 'sale' ? 'ON SALE' : (p.tag === 'sold' ? 'SOLD OUT!' : 'NEW!!')}</div>` : ''; const card = document.createElement('div'); card.id = `grid-card-${p.id}`; card.className = 'product-card group cursor-pointer reveal flex flex-col items-center text-center'; card.innerHTML = `<div id="grid-img-container-${p.id}" class="aspect-[3/4] w-full bg-gray-100 dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden mb-5 relative shadow-sm transition-all">${badge}${isAdmin ? `<div class="absolute top-4 right-4 z-20 flex flex-col gap-2"><button onclick="event.stopPropagation(); deleteCar(${p.id})" class="bg-red-500 text-white w-9 h-9 rounded-full flex items-center justify-center shadow-lg font-bold">×</button><button onclick="event.stopPropagation(); editCar(${p.id})" class="bg-black text-white w-9 h-9 rounded-full flex items-center justify-center shadow-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button></div>` : ''}<img src="${p.img.split(',')[0]}" onmouseenter="startHoverSlide(this, '${p.img}')" onmouseleave="stopHoverSlide(this, '${p.img.split(',')[0]}')" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-[1s] ease-out"><div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div><button onclick="event.stopPropagation(); quickAdd(${p.id})" class="absolute bottom-6 right-6 w-14 h-14 glass-btn text-black rounded-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all shadow-xl"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg></button></div><div class="px-2 w-full"><h3 class="text-[15px] font-black uppercase mb-1 tracking-tight leading-none">${p.title}</h3><div class="flex items-center space-x-3 justify-center"><span class="text-xl font-black tracking-tighter">₹${p.price}</span><span class="text-xs text-gray-400 line-through">₹${Math.round(p.old_price)}</span></div></div>`; card.onclick = () => openModal(p, `grid-img-container-${p.id}`); els.grid.appendChild(card); }); }
     let slideInterval;
     let currentSlide = 0;
     let modalImgs = [];
@@ -535,22 +544,30 @@
 
         if (imgId && document.startViewTransition) {
             const gridImg = document.getElementById(imgId);
+            const gridCard = document.getElementById(`grid-card-${p.id}`);
             const modalImg = document.getElementById('modalImgContainer');
+            const modalBox = els.modal;
             
-            if (gridImg && modalImg) {
+            if (gridImg && modalImg && gridCard && modalBox) {
                 gridImg.style.viewTransitionName = 'active-car';
+                gridCard.style.viewTransitionName = 'active-modal';
                 modalImg.style.viewTransitionName = '';
+                modalBox.style.viewTransitionName = '';
                 
                 const transition = document.startViewTransition(() => {
                     gridImg.style.viewTransitionName = '';
+                    gridCard.style.viewTransitionName = '';
                     modalImg.style.viewTransitionName = 'active-car';
+                    modalBox.style.viewTransitionName = 'active-modal';
                     els.modal.classList.remove('transition-all', 'duration-500');
                     openUI();
                 });
                 
                 transition.finished.finally(() => {
                     gridImg.style.viewTransitionName = '';
+                    gridCard.style.viewTransitionName = '';
                     modalImg.style.viewTransitionName = '';
+                    modalBox.style.viewTransitionName = '';
                     els.modal.classList.add('transition-all', 'duration-500');
                 });
                 return;
@@ -575,21 +592,30 @@
 
             if (selectedProduct && document.startViewTransition) {
                 const gridImg = document.getElementById('grid-img-container-' + selectedProduct.id);
+                const gridCard = document.getElementById('grid-card-' + selectedProduct.id);
                 const modalImg = document.getElementById('modalImgContainer');
-                if (gridImg && modalImg) {
+                const modalBox = els.modal;
+                
+                if (gridImg && modalImg && gridCard && modalBox) {
                     modalImg.style.viewTransitionName = 'active-car';
+                    modalBox.style.viewTransitionName = 'active-modal';
                     gridImg.style.viewTransitionName = '';
+                    gridCard.style.viewTransitionName = '';
                     
                     const transition = document.startViewTransition(() => {
                         modalImg.style.viewTransitionName = '';
+                        modalBox.style.viewTransitionName = '';
                         gridImg.style.viewTransitionName = 'active-car';
+                        gridCard.style.viewTransitionName = 'active-modal';
                         els.modal.classList.remove('transition-all', 'duration-500');
                         closeUI();
                     });
                     
                     transition.finished.finally(() => {
                         gridImg.style.viewTransitionName = '';
+                        gridCard.style.viewTransitionName = '';
                         modalImg.style.viewTransitionName = '';
+                        modalBox.style.viewTransitionName = '';
                         els.modal.classList.add('transition-all', 'duration-500');
                     });
                     return;
