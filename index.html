@@ -527,34 +527,39 @@
         }
 
         if (imgId && typeof Flip !== 'undefined') {
-            const gridImg = document.getElementById(imgId);
-            const gridCard = document.getElementById(`grid-card-${p.id}`);
-            const modalImg = document.getElementById('modalImgContainer');
-            const modalBox = els.modal;
-            
-            if (gridImg && modalImg && gridCard && modalBox) {
-                els.modal.classList.remove('scale-95', 'opacity-0', 'pointer-events-none', 'transition-all', 'duration-500');
-                els.modal.classList.add('scale-100', 'opacity-100', 'pointer-events-auto');
-                els.overlay.classList.add('active');
-                document.body.style.overflow = 'hidden';
+            try {
+                gsap.registerPlugin(Flip);
+                const gridImg = document.getElementById(imgId);
+                const gridCard = document.getElementById(`grid-card-${p.id}`);
+                const modalImg = document.getElementById('modalImgContainer');
+                const modalBox = els.modal;
+                
+                if (gridImg && modalImg && gridCard && modalBox) {
+                    gridCard.dataset.flipId = `card-${p.id}`;
+                    modalBox.dataset.flipId = `card-${p.id}`;
+                    gridImg.dataset.flipId = `img-${p.id}`;
+                    modalImg.dataset.flipId = `img-${p.id}`;
 
-                const state = Flip.getState([modalBox, modalImg]);
+                    const state = Flip.getState([gridCard, gridImg]);
 
-                Flip.fit(modalBox, gridCard, {scale: true});
-                Flip.fit(modalImg, gridImg, {scale: true});
+                    els.modal.classList.remove('scale-95', 'opacity-0', 'pointer-events-none', 'transition-all', 'duration-500');
+                    els.modal.classList.add('scale-100', 'opacity-100', 'pointer-events-auto');
+                    els.overlay.classList.add('active');
+                    document.body.style.overflow = 'hidden';
 
-                gridCard.style.visibility = 'hidden';
+                    gridCard.style.visibility = 'hidden';
 
-                Flip.from(state, {
-                    duration: 0.6,
-                    ease: "power3.inOut",
-                    scale: true,
-                    absolute: true,
-                    onComplete: () => {
-                        gsap.set([modalBox, modalImg], {clearProps: "all"});
-                    }
-                });
-                return;
+                    Flip.from(state, {
+                        targets: [modalBox, modalImg],
+                        duration: 0.6,
+                        ease: "power3.inOut",
+                        scale: true,
+                        absolute: true
+                    });
+                    return;
+                }
+            } catch (e) {
+                console.error("GSAP Flip Error (open):", e);
             }
         }
         
@@ -578,35 +583,43 @@
             clearInterval(slideInterval);
             
             if (selectedProduct && typeof Flip !== 'undefined') {
-                const gridImg = document.getElementById('grid-img-container-' + selectedProduct.id);
-                const gridCard = document.getElementById('grid-card-' + selectedProduct.id);
-                const modalImg = document.getElementById('modalImgContainer');
-                const modalBox = els.modal;
-                
-                if (gridImg && modalImg && gridCard && modalBox) {
-                    const state = Flip.getState([modalBox, modalImg]);
+                try {
+                    gsap.registerPlugin(Flip);
+                    const gridImg = document.getElementById('grid-img-container-' + selectedProduct.id);
+                    const gridCard = document.getElementById('grid-card-' + selectedProduct.id);
+                    const modalImg = document.getElementById('modalImgContainer');
+                    const modalBox = els.modal;
                     
-                    Flip.fit(modalBox, gridCard, {scale: true});
-                    Flip.fit(modalImg, gridImg, {scale: true});
-                    
-                    Flip.from(state, {
-                        duration: 0.5,
-                        ease: "power3.inOut",
-                        scale: true,
-                        absolute: true,
-                        onComplete: () => {
-                            gsap.set([modalBox, modalImg], {clearProps: "all"});
-                            els.modal.classList.add('scale-95', 'opacity-0', 'pointer-events-none');
-                            els.modal.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto', 'transition-all', 'duration-500');
-                            els.overlay.classList.remove('active');
-                            gridCard.style.visibility = 'visible';
-                            checkOverlay();
-                            document.body.style.overflow = 'auto';
-                            els.modal.classList.add('transition-all', 'duration-500');
-                        }
-                    });
-                    selectedProduct = null;
-                    return;
+                    if (gridImg && modalImg && gridCard && modalBox) {
+                        gridCard.dataset.flipId = `card-${selectedProduct.id}`;
+                        modalBox.dataset.flipId = `card-${selectedProduct.id}`;
+                        gridImg.dataset.flipId = `img-${selectedProduct.id}`;
+                        modalImg.dataset.flipId = `img-${selectedProduct.id}`;
+                        
+                        const state = Flip.getState([modalBox, modalImg]);
+                        
+                        els.modal.classList.add('scale-95', 'opacity-0', 'pointer-events-none');
+                        els.modal.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto', 'transition-all', 'duration-500');
+                        els.overlay.classList.remove('active');
+                        gridCard.style.visibility = 'visible';
+                        checkOverlay();
+                        document.body.style.overflow = 'auto';
+                        
+                        Flip.from(state, {
+                            targets: [gridCard, gridImg],
+                            duration: 0.5,
+                            ease: "power3.inOut",
+                            scale: true,
+                            absolute: true,
+                            onComplete: () => {
+                                els.modal.classList.add('transition-all', 'duration-500');
+                            }
+                        });
+                        selectedProduct = null;
+                        return;
+                    }
+                } catch (e) {
+                    console.error("GSAP Flip Error (close):", e);
                 }
             }
             
