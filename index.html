@@ -114,23 +114,10 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
-        /* View Transitions */
-        ::view-transition-group(active-car),
-        ::view-transition-group(active-modal) {
-            animation-duration: 0.6s;
-            animation-timing-function: var(--apple-spring);
-        }
-        
-        ::view-transition-old(active-modal),
-        ::view-transition-new(active-modal),
-        ::view-transition-old(active-car),
-        ::view-transition-new(active-car) {
-            height: 100%;
-            width: 100%;
-            object-fit: cover;
-        }
     </style>
+    <!-- GSAP & Flip Plugin -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Flip.min.js"></script>
 </head>
 <body class="light">
 
@@ -509,71 +496,72 @@
     function openModal(p, imgId) {
         selectedProduct = p; modalImgs = p.img.split(','); currentSlide = 0;
         
-        const openUI = () => {
-            document.getElementById('modalImg').src = modalImgs[0];
-            document.getElementById('modalTitle').innerText = p.title;
-            document.getElementById('modalPrice').innerText = `₹${p.price}`;
+        document.getElementById('modalImg').src = modalImgs[0];
+        document.getElementById('modalTitle').innerText = p.title;
+        document.getElementById('modalPrice').innerText = `₹${p.price}`;
+        document.getElementById('modalAddToCart').onclick = () => addToCart(p);
 
-            const featList = document.getElementById('modalFeatures');
-            featList.innerHTML = '';
-            if (p.features) {
-                p.features.split(',').forEach(f => {
-                    const text = f.trim();
-                    if (text) featList.innerHTML += `<li class="flex items-center space-x-3"><svg class="w-5 h-5 text-black dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg><span class="text-black dark:text-gray-300">${text}</span></li>`;
-                });
-            } else {
-                featList.innerHTML = `<li class="text-gray-400 italic">No features listed.</li>`;
-            }
+        const featList = document.getElementById('modalFeatures');
+        featList.innerHTML = '';
+        if (p.features) {
+            p.features.split(',').forEach(f => {
+                const text = f.trim();
+                if (text) featList.innerHTML += `<li class="flex items-center space-x-3"><svg class="w-5 h-5 text-black dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg><span class="text-black dark:text-gray-300">${text}</span></li>`;
+            });
+        } else {
+            featList.innerHTML = `<li class="text-gray-400 italic">No features listed.</li>`;
+        }
 
-            clearInterval(slideInterval);
+        clearInterval(slideInterval);
 
-            const prevBtn = document.getElementById('modalPrev');
-            const nextBtn = document.getElementById('modalNext');
+        const prevBtn = document.getElementById('modalPrev');
+        const nextBtn = document.getElementById('modalNext');
 
-            if(modalImgs.length > 1) {
-                prevBtn.classList.remove('hidden');
-                nextBtn.classList.remove('hidden');
-                slideInterval = setInterval(() => navSlide(1), 2500);
-            } else {
-                prevBtn.classList.add('hidden');
-                nextBtn.classList.add('hidden');
-            }
+        if(modalImgs.length > 1) {
+            prevBtn.classList.remove('hidden');
+            nextBtn.classList.remove('hidden');
+            slideInterval = setInterval(() => navSlide(1), 2500);
+        } else {
+            prevBtn.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+        }
 
-            els.modal.classList.remove('scale-95', 'opacity-0', 'pointer-events-none'); els.modal.classList.add('scale-100', 'opacity-100', 'pointer-events-auto'); els.overlay.classList.add('active'); document.body.style.overflow = 'hidden';
-        };
-
-        if (imgId && document.startViewTransition) {
+        if (imgId && typeof Flip !== 'undefined') {
             const gridImg = document.getElementById(imgId);
             const gridCard = document.getElementById(`grid-card-${p.id}`);
             const modalImg = document.getElementById('modalImgContainer');
             const modalBox = els.modal;
             
             if (gridImg && modalImg && gridCard && modalBox) {
-                gridImg.style.viewTransitionName = 'active-car';
-                gridCard.style.viewTransitionName = 'active-modal';
-                modalImg.style.viewTransitionName = '';
-                modalBox.style.viewTransitionName = '';
-                
-                const transition = document.startViewTransition(() => {
-                    gridImg.style.viewTransitionName = '';
-                    gridCard.style.viewTransitionName = '';
-                    modalImg.style.viewTransitionName = 'active-car';
-                    modalBox.style.viewTransitionName = 'active-modal';
-                    els.modal.classList.remove('transition-all', 'duration-500');
-                    openUI();
-                });
-                
-                transition.finished.finally(() => {
-                    gridImg.style.viewTransitionName = '';
-                    gridCard.style.viewTransitionName = '';
-                    modalImg.style.viewTransitionName = '';
-                    modalBox.style.viewTransitionName = '';
-                    els.modal.classList.add('transition-all', 'duration-500');
+                els.modal.classList.remove('scale-95', 'opacity-0', 'pointer-events-none', 'transition-all', 'duration-500');
+                els.modal.classList.add('scale-100', 'opacity-100', 'pointer-events-auto');
+                els.overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+
+                const state = Flip.getState([modalBox, modalImg]);
+
+                Flip.fit(modalBox, gridCard, {scale: true});
+                Flip.fit(modalImg, gridImg, {scale: true});
+
+                gridCard.style.visibility = 'hidden';
+
+                Flip.from(state, {
+                    duration: 0.6,
+                    ease: "power3.inOut",
+                    scale: true,
+                    absolute: true,
+                    onComplete: () => {
+                        gsap.set([modalBox, modalImg], {clearProps: "all"});
+                    }
                 });
                 return;
             }
         }
-        openUI();
+        
+        els.modal.classList.remove('scale-95', 'opacity-0', 'pointer-events-none'); 
+        els.modal.classList.add('scale-100', 'opacity-100', 'pointer-events-auto'); 
+        els.overlay.classList.add('active'); 
+        document.body.style.overflow = 'hidden';
     }
 
         function navSlide(dir) {
@@ -586,42 +574,47 @@
         }
         
         function closeModal() { 
-            const closeUI = () => {
-                clearInterval(slideInterval); els.modal.classList.add('scale-95', 'opacity-0', 'pointer-events-none'); els.modal.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto'); checkOverlay(); document.body.style.overflow = 'auto';
-            };
-
-            if (selectedProduct && document.startViewTransition) {
+            if (!els.modal.classList.contains('scale-100')) return;
+            clearInterval(slideInterval);
+            
+            if (selectedProduct && typeof Flip !== 'undefined') {
                 const gridImg = document.getElementById('grid-img-container-' + selectedProduct.id);
                 const gridCard = document.getElementById('grid-card-' + selectedProduct.id);
                 const modalImg = document.getElementById('modalImgContainer');
                 const modalBox = els.modal;
                 
                 if (gridImg && modalImg && gridCard && modalBox) {
-                    modalImg.style.viewTransitionName = 'active-car';
-                    modalBox.style.viewTransitionName = 'active-modal';
-                    gridImg.style.viewTransitionName = '';
-                    gridCard.style.viewTransitionName = '';
+                    const state = Flip.getState([modalBox, modalImg]);
                     
-                    const transition = document.startViewTransition(() => {
-                        modalImg.style.viewTransitionName = '';
-                        modalBox.style.viewTransitionName = '';
-                        gridImg.style.viewTransitionName = 'active-car';
-                        gridCard.style.viewTransitionName = 'active-modal';
-                        els.modal.classList.remove('transition-all', 'duration-500');
-                        closeUI();
-                    });
+                    Flip.fit(modalBox, gridCard, {scale: true});
+                    Flip.fit(modalImg, gridImg, {scale: true});
                     
-                    transition.finished.finally(() => {
-                        gridImg.style.viewTransitionName = '';
-                        gridCard.style.viewTransitionName = '';
-                        modalImg.style.viewTransitionName = '';
-                        modalBox.style.viewTransitionName = '';
-                        els.modal.classList.add('transition-all', 'duration-500');
+                    Flip.from(state, {
+                        duration: 0.5,
+                        ease: "power3.inOut",
+                        scale: true,
+                        absolute: true,
+                        onComplete: () => {
+                            gsap.set([modalBox, modalImg], {clearProps: "all"});
+                            els.modal.classList.add('scale-95', 'opacity-0', 'pointer-events-none');
+                            els.modal.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto', 'transition-all', 'duration-500');
+                            els.overlay.classList.remove('active');
+                            gridCard.style.visibility = 'visible';
+                            checkOverlay();
+                            document.body.style.overflow = 'auto';
+                            els.modal.classList.add('transition-all', 'duration-500');
+                        }
                     });
+                    selectedProduct = null;
                     return;
                 }
             }
-            closeUI();
+            
+            els.modal.classList.add('scale-95', 'opacity-0', 'pointer-events-none'); 
+            els.modal.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto'); 
+            checkOverlay(); 
+            document.body.style.overflow = 'auto';
+            selectedProduct = null;
         }
     function openCart() { els.cart.classList.add('active'); els.overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
     function closeCart() { els.cart.classList.remove('active'); checkOverlay(); document.body.style.overflow = 'auto'; }
